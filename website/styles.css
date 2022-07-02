@@ -1,0 +1,18 @@
+* {
+    color: white;
+}
+
+/** {
+    border-style: solid;
+    border-color: white;
+    border-width: 1px;
+}*/
+
+header {
+    background-color: black;
+}
+
+.undecorated-link {
+    text-decoration: none;
+    color: white;
+}
