@@ -22,7 +22,7 @@
 		"@smui/paper": "^7.0.0-beta.0",
 		"@smui/textfield": "^7.0.0-beta.0",
 		"@sveltejs/adapter-auto": "^2.0.0",
-		"@sveltejs/kit": "^1.5.0",
+		"@sveltejs/kit": "^1.15.1",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
 		"eslint": "^8.28.0",
