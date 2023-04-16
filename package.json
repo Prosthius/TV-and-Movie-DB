@@ -16,6 +16,7 @@
 	},
 	"devDependencies": {
 		"@material/typography": "^14.0.0",
+		"@smui/circular-progress": "^7.0.0-beta.3",
 		"@smui/common": "^7.0.0-beta.0",
 		"@smui/fab": "^7.0.0-beta.0",
 		"@smui/layout-grid": "^7.0.0-beta.0",
