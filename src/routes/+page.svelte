@@ -24,7 +24,7 @@
 		Error
 		{JSON.stringify(searchResultsError)}
 	</div>
-{:else if $searchResults.Search[0].Poster === '0'}
+{:else if $searchResults.Search[0].Poster === ''}
 	<div />
 {:else}
 	{#each $searchResults.Search as movie, i}
