@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../app.scss';
-	import { PUBLIC_API_KEY as apiKey } from '$env/static/public';
     import { goto } from '$app/navigation';
 	import type { OmdbSearchResults } from '$lib/interfaces/OmdbSearchResults/SearchResults';
 	import type { OmdbError } from '$lib/interfaces/OmdbSearchResults/Error';
@@ -18,7 +17,7 @@
 
 	let lightTheme: boolean;
 	let searchTitleInput: string;
-	let baseURL: string = `https://www.omdbapi.com/?apikey=${apiKey}&`;
+	let baseURL: string = `https://omdb-search.mtvdb.callumhopkins.au`;
 
 	onMount(() => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -32,7 +31,7 @@
 	async function searchTitle(query: string): Promise<void> {
 		searchTitleInput = '';
 		try {
-			let res: Response = await fetch(`${baseURL}s=${query}`);
+			let res: Response = await fetch(`${baseURL}/?s=${query}`);
 			let json: OmdbSearchResults & OmdbError = await res.json();
 			if (json.Response === 'False') {
 				searchResultsError.set(json);
