@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { searchResults, selectedTitle, selectedTitleDetails } from '../stores';
-	import { PUBLIC_API_KEY as apiKey } from '$env/static/public';
 	import type { TitleDetails } from '$lib/interfaces/OmdbSearchResults/TitleDetails';
 	import type { OmdbError } from '$lib/interfaces/OmdbSearchResults/Error';
 
-	let baseURL: string = `https://www.omdbapi.com/?apikey=${apiKey}&`;
+	let baseURL: string = `https://omdb-search-id.mtvdb.callumhopkins.au`;
 
 	onMount(async () => {
 		await getInfo($selectedTitle);
@@ -15,7 +14,7 @@
 	async function getInfo(index: number): Promise<void> {
 		console.log($searchResults.Search[index].imdbID);
 		try {
-			let res: Response = await fetch(`${baseURL}i=${$searchResults.Search[index].imdbID}`);
+			let res: Response = await fetch(`${baseURL}/?i=${$searchResults.Search[index].imdbID}&plot=full`);
 			let json: TitleDetails & OmdbError = await res.json();
 			selectedTitleDetails.set(json);
 		} catch (error) {
