@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { searchResults, selectedTitle, selectedTitleDetails } from '../stores';
-	import type { TitleDetails } from '$lib/interfaces/OmdbSearchResults/TitleDetails';
-	import type { OmdbError } from '$lib/interfaces/OmdbSearchResults/Error';
+	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
+	import type { Error } from '$lib/interfaces/Error';
 
 	let baseURL: string = `https://omdb-search-id.mtvdb.callumhopkins.au`;
 
@@ -14,8 +14,10 @@
 	async function getInfo(index: number): Promise<void> {
 		console.log($searchResults.Search[index].imdbID);
 		try {
-			let res: Response = await fetch(`${baseURL}/?i=${$searchResults.Search[index].imdbID}&plot=full`);
-			let json: TitleDetails & OmdbError = await res.json();
+			let res: Response = await fetch(
+				`${baseURL}/?i=${$searchResults.Search[index].imdbID}&plot=full`
+			);
+			let json: TitleDetails & Error = await res.json();
 			selectedTitleDetails.set(json);
 		} catch (error) {
 			console.log(error);
