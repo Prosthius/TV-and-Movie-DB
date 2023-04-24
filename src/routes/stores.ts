@@ -1,31 +1,53 @@
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { OmdbSearchResults } from '$lib/interfaces/OmdbSearchResults/SearchResults';
-import type { OmdbError } from '$lib/interfaces/OmdbSearchResults/Error';
-import type { TitleDetails } from '$lib/interfaces/OmdbSearchResults/TitleDetails';
+import type { SearchResults, SearchResultsLoading } from '$lib/interfaces/SearchResults';
+import type { Error, ErrorLoading } from '$lib/interfaces/Error';
+import type { TitleDetails } from '$lib/interfaces/TitleDetails';
 
-export const searchResults: Writable<OmdbSearchResults> = writable({
-    Search: [
-        {
-            Title: '',
-            Year: '',
-            imdbID: '',
-            Type: '',
-            Poster: ''
-        },
-    ],
-    totalResults: '',
-    Response: 'False'
-});
+function createSearchResults(): SearchResultsLoading {
+    const { subscribe, set, update }: Writable<SearchResults> = writable<SearchResults>({
+        Search: [
+            {
+                Title: '',
+                Year: '',
+                imdbID: '',
+                Type: '',
+                Poster: ''
+            },
+        ],
+        Loading: false,
+        totalResults: '',
+        Response: 'False'
+    });
 
-export const searchResultsError: Writable<OmdbError> = writable({
-    Error: '',
-    Response: 'False'
-});
+    return {
+        subscribe,
+        set,
+        update,
+        loadingTrue: () => update(state => ({ ...state, Loading: true })),
+        loadingFalse: () => update(state => ({ ...state, Loading: false })),
+    };
+}
+export const searchResults: SearchResultsLoading = createSearchResults();
 
-export const selectedTitle: Writable<number> = writable(0);
+function createSearchResultsError(): ErrorLoading {
+    const { subscribe, set, update }: Writable<Error> = writable<Error>({
+        Error: '',
+        Response: 'False',
+        Status: false
+    });
 
-export const selectedTitleDetails = writable<TitleDetails>({
+    return {
+        subscribe,
+        set,
+        update,
+        errorTrue: () => update(state => ({ ...state, Status: true })),
+        errorFalse: () => update(state => ({ ...state, Status: false })),
+    };
+}
+export const searchResultsError: ErrorLoading = createSearchResultsError();
+
+export const selectedTitleDetails: Writable<TitleDetails> = writable<TitleDetails>({
     Title: '',
     Year: '',
     Rated: '',
@@ -49,3 +71,5 @@ export const selectedTitleDetails = writable<TitleDetails>({
     totalSeasons: '',
     Response: ''
 });
+
+export const selectedTitle: Writable<number> = writable<number>(0);
