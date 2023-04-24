@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '../app.scss';
-    import { goto } from '$app/navigation';
-	import type { OmdbSearchResults } from '$lib/interfaces/OmdbSearchResults/SearchResults';
-	import type { OmdbError } from '$lib/interfaces/OmdbSearchResults/Error';
+	import { goto } from '$app/navigation';
+	import type { SearchResults } from '$lib/interfaces/SearchResults';
+	import type { Error } from '$lib/interfaces/Error';
 	import { searchResults, searchResultsError } from './stores';
 	import { onMount } from 'svelte';
 	import { Icon } from '@smui/common';
@@ -29,21 +29,30 @@
 	}
 
 	async function searchTitle(query: string): Promise<void> {
+		searchResults.loadingTrue();
+		goto('/');
+		searchResultsError.errorFalse();
 		searchTitleInput = '';
 		try {
 			let res: Response = await fetch(`${baseURL}/?s=${query}`);
-			let json: OmdbSearchResults & OmdbError = await res.json();
+			let json: SearchResults & Error = await res.json();
 			if (json.Response === 'False') {
 				searchResultsError.set(json);
-				console.log(json);
+				searchResultsError.update((storeValue) => { // Move to custom store
+					storeValue = { ...storeValue, ...json };
+					storeValue.Status = true;
+					return storeValue;
+				});
 			} else {
-				searchResults.set(json);
-				console.log(json);
+				searchResults.update((storeValue) => { // Move to custom store
+					storeValue = { ...storeValue, ...json };
+					storeValue.Loading = false;
+					return storeValue;
+				});
 			}
 		} catch (error) {
 			console.log(error);
 		}
-        goto('/');
 	}
 </script>
 
@@ -62,7 +71,8 @@
 <TopAppBar variant="static">
 	<Row>
 		<Section>
-			<h4 class="title"><a href="./">MTVDB</a></h4>
+			<!-- TODO - refresh the page when clicked -->
+			<h4 class="title"><a href="/">MTVDB</a></h4>
 		</Section>
 		<Section align="end" toolbar>
 			<Wrapper>
@@ -136,7 +146,7 @@
 		padding-left: 10px;
 	}
 
-    .title * {
-        text-decoration: none;
-    }
+	.title * {
+		text-decoration: none;
+	}
 </style>
