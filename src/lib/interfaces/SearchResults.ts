@@ -1,6 +1,6 @@
 import type { Writable } from 'svelte/store';
 
-export interface SearchResults {
+export interface SearchResultsData {
     Search: Search[];
     Loading: boolean;
     totalResults: string;
@@ -15,7 +15,9 @@ interface Search {
     Poster: string;
 }
 
-export interface SearchResultsLoading extends Writable<SearchResults> {
+export interface SearchResults extends Writable<SearchResultsData> {
     loadingTrue: () => void;
     loadingFalse: () => void;
+    setData: (json: SearchResultsData) => void;
+    reset: () => void;
 }
