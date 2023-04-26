@@ -1,9 +1,9 @@
 <script lang="ts">
 	import '../app.scss';
 	import { goto } from '$app/navigation';
-	import type { SearchResults } from '$lib/interfaces/SearchResults';
-	import type { Error } from '$lib/interfaces/Error';
-	import { searchResults, searchResultsError } from './stores';
+	import type { SearchResultsData } from '$lib/interfaces/SearchResults';
+	import type { ErrorData } from '$lib/interfaces/Error';
+	import { searchResults, error } from './stores';
 	import { onMount } from 'svelte';
 	import { Icon } from '@smui/common';
 	import { Input } from '@smui/textfield';
@@ -31,25 +31,12 @@
 	async function searchTitle(query: string): Promise<void> {
 		searchResults.loadingTrue();
 		goto('/');
-		searchResultsError.errorFalse();
+		error.errorFalse();
 		searchTitleInput = '';
 		try {
 			let res: Response = await fetch(`${baseURL}/?s=${query}`);
-			let json: SearchResults & Error = await res.json();
-			if (json.Response === 'False') {
-				searchResultsError.set(json);
-				searchResultsError.update((storeValue) => { // Move to custom store
-					storeValue = { ...storeValue, ...json };
-					storeValue.Status = true;
-					return storeValue;
-				});
-			} else {
-				searchResults.update((storeValue) => { // Move to custom store
-					storeValue = { ...storeValue, ...json };
-					storeValue.Loading = false;
-					return storeValue;
-				});
-			}
+			let json: SearchResultsData | ErrorData = await res.json();
+			json.Response === 'False' ? error.setData(json as ErrorData) : searchResults.setData(json as SearchResultsData);
 		} catch (error) {
 			console.log(error);
 		}
@@ -72,7 +59,7 @@
 	<Row>
 		<Section>
 			<!-- TODO - refresh the page when clicked -->
-			<h4 class="title"><a href="/">MTVDB</a></h4>
+			<h4 class="title"><a href="/" on:click={() => searchResults.reset()}>MTVDB</a></h4>
 		</Section>
 		<Section align="end" toolbar>
 			<Wrapper>
