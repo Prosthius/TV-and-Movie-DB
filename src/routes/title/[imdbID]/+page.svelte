@@ -1,24 +1,25 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { searchResults, selectedTitle, selectedTitleDetails, error } from '../stores';
+	import { selectedTitleDetails, error } from '$lib/stores';
 	import { page } from '$app/stores';	
 	import type { TitleDetailsData } from '$lib/interfaces/TitleDetails';
 	import type { ErrorData } from '$lib/interfaces/Error';
 	import CircularProgress from '@smui/circular-progress';
 
-	// TODO - Use URL variables to pass imdbID and title as props
-
 	let baseURL: string = `https://omdb-search-id.mtvdb.callumhopkins.au`;
 
 	onMount(async () => {
-		await getInfo($selectedTitle);
+		await getInfo($page.params.imdbID);
+		window.addEventListener('popstate', (event) => {
+			console.log('popstate event:', event);
+		});
 	});
 
-	async function getInfo(index: number): Promise<void> {
+	async function getInfo(imdbID: string): Promise<void> {
 		selectedTitleDetails.loadingTrue();
 		try {
 			let res: Response = await fetch(
-				`${baseURL}/?i=${$searchResults.Search[index].imdbID}&plot=full`
+				`${baseURL}/?i=${imdbID}&plot=full`
 			);
 			let json: TitleDetailsData | ErrorData = await res.json();
 			json.Response === 'False'

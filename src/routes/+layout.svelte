@@ -1,10 +1,11 @@
 <script lang="ts">
 	import '../app.scss';
+	import { onMount, setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import type { SearchResultsData } from '$lib/interfaces/SearchResults';
 	import type { ErrorData } from '$lib/interfaces/Error';
-	import { searchResults, error } from './stores';
-	import { onMount } from 'svelte';
+	import { searchResults, error } from '$lib/stores';
+	import { page } from '$app/stores';
 	import { Icon } from '@smui/common';
 	import { Input } from '@smui/textfield';
 	import Paper from '@smui/paper';
@@ -19,6 +20,8 @@
 	let searchTitleInput: string;
 	let baseURL: string = `https://omdb-search.mtvdb.callumhopkins.au`;
 
+	setContext('searchTitle', searchTitle);
+
 	onMount(() => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
@@ -30,13 +33,15 @@
 
 	async function searchTitle(query: string): Promise<void> {
 		searchResults.loadingTrue();
-		goto('/');
+		goto(`/search/${encodeURIComponent(query)}`);
 		error.errorFalse();
 		searchTitleInput = '';
 		try {
 			let res: Response = await fetch(`${baseURL}/?s=${query}`);
 			let json: SearchResultsData | ErrorData = await res.json();
-			json.Response === 'False' ? error.setData(json as ErrorData) : searchResults.setData(json as SearchResultsData);
+			json.Response === 'False'
+				? error.setData(json as ErrorData)
+				: searchResults.setData(json as SearchResultsData);
 		} catch (error) {
 			console.log(error);
 		}
@@ -92,7 +97,7 @@
 					class="input"
 				/>
 			</Paper>
-			<Fab on:click={() => searchTitle(searchTitleInput)} color="primary" mini class="fab">
+			<Fab on:click={() => searchTitle($page.params.query)} color="primary" mini class="fab">
 				<Icon class="material-icons">arrow_forward</Icon>
 			</Fab>
 		</Cell>
