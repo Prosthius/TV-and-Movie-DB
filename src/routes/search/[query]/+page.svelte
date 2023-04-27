@@ -40,9 +40,9 @@
 {:else if $searchResults.Response === 'True'}
 	{#each $searchResults.Search as movie, i}
 		<span on:click={() => handleSelectTitle(i)} on:keydown={() => handleSelectTitleEnter}>
-			<!-- <a href={`/title/${movie.imdbID}`}> -->
+			<a href={`/title/${movie.imdbID}`}>
 				<h3>{movie.Title}</h3>
-			<!-- </a> -->
+			</a>
 		</span>
 		<p>{movie.Year}</p>
 		<img src={movie.Poster} alt="{movie.Title} poster" />
