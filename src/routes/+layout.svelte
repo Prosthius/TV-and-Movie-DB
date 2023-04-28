@@ -64,7 +64,16 @@
 	<Row>
 		<Section>
 			<!-- TODO - refresh the page when clicked -->
-			<h4 class="title"><a href="/" on:click={() => searchResults.reset()}>MTVDB</a></h4>
+			<h4 class="title">
+				<a
+					href="/"
+					on:click={() => {
+						searchResults.reset();
+						location.assign('/');
+						setTimeout(() => location.reload(), 0);
+					}}>MTVDB</a
+				>
+			</h4>
 		</Section>
 		<Section align="end" toolbar>
 			<Wrapper>
