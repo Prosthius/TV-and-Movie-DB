@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { onMount, getContext } from 'svelte';
-	import { searchResults, error, selectedTitle, popstateFired } from '$lib/stores';
+	import { onMount, onDestroy, getContext } from 'svelte';
+	import { searchResults, error, selectedTitle } from '$lib/stores';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { Icon } from '@smui/common';
@@ -10,18 +10,11 @@
 	import Cell from '@smui/layout-grid/src/Cell.svelte';
 	import Fab from '@smui/fab/src/Fab.svelte';
 	import CircularProgress from '@smui/circular-progress';
-	import { writable } from 'svelte/store';
 
-	const searchTitle: (query: string) => Promise<void> = getContext('searchTitle');
+	const searchTitle: (query: string, pageNav: Boolean) => Promise<void> = getContext('searchTitle');
 
-	onMount(() => {
-		$popstateFired = false;
-		window.addEventListener('popstate', (event: PopStateEvent) => {
-			popstateFired.set(true);
-			console.log('fired ' + $popstateFired);
-		});
-		console.log($popstateFired);
-		if ($popstateFired === false) searchTitle($page.params.query);
+	onMount(async () => {
+		await searchTitle($page.params.query, false);
 	});
 
 	function handleSelectTitle(i: number): void {

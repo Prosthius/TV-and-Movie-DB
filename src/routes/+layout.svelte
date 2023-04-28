@@ -28,12 +28,12 @@
 
 	function handleSearchEnterPress(event: CustomEvent | KeyboardEvent): void {
 		event = event as KeyboardEvent;
-		event.key === 'Enter' ? searchTitle(searchTitleInput) : null;
+		event.key === 'Enter' ? searchTitle(searchTitleInput, true) : null;
 	}
 
-	async function searchTitle(query: string): Promise<void> {
+	async function searchTitle(query: string, pageNav: Boolean): Promise<void> {
 		searchResults.loadingTrue();
-		goto(`/search/${encodeURIComponent(query)}`);
+		pageNav ? goto(`/search/${encodeURIComponent(query)}`) : null;
 		error.errorFalse();
 		searchTitleInput = '';
 		try {
@@ -97,7 +97,7 @@
 					class="input"
 				/>
 			</Paper>
-			<Fab on:click={() => searchTitle($page.params.query)} color="primary" mini class="fab">
+			<Fab on:click={() => searchTitle($page.params.query, true)} color="primary" mini class="fab">
 				<Icon class="material-icons">arrow_forward</Icon>
 			</Fab>
 		</Cell>
