@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, getContext } from 'svelte';
+	import { onMount, onDestroy, getContext } from 'svelte';
 	import { searchResults, error, selectedTitle } from '$lib/stores';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -11,11 +11,10 @@
 	import Fab from '@smui/fab/src/Fab.svelte';
 	import CircularProgress from '@smui/circular-progress';
 
-	const searchTitle: (query: string) => Promise<void> = getContext('searchTitle');
+	const searchTitle: (query: string, pageNav: Boolean) => Promise<void> = getContext('searchTitle');
 
-	onMount(() => {
-		searchTitle($page.params.query);
-		console.log(history.length);
+	onMount(async () => {
+		await searchTitle($page.params.query, false);
 	});
 
 	function handleSelectTitle(i: number): void {
