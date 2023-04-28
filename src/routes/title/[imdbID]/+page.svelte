@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { selectedTitleDetails, error } from '$lib/stores';
-	import { page } from '$app/stores';	
+	import { page } from '$app/stores';
 	import type { TitleDetailsData } from '$lib/interfaces/TitleDetails';
 	import type { ErrorData } from '$lib/interfaces/Error';
 	import CircularProgress from '@smui/circular-progress';
@@ -10,17 +10,12 @@
 
 	onMount(async () => {
 		await getInfo($page.params.imdbID);
-		window.addEventListener('popstate', (event) => {
-			console.log('popstate event:', event);
-		});
 	});
 
 	async function getInfo(imdbID: string): Promise<void> {
 		selectedTitleDetails.loadingTrue();
 		try {
-			let res: Response = await fetch(
-				`${baseURL}/?i=${imdbID}&plot=full`
-			);
+			let res: Response = await fetch(`${baseURL}/?i=${imdbID}&plot=full`);
 			let json: TitleDetailsData | ErrorData = await res.json();
 			json.Response === 'False'
 				? error.setData(json as ErrorData)

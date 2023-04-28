@@ -114,3 +114,5 @@ function createSelectedTitleDetails(): TitleDetails {
 export const selectedTitleDetails: TitleDetails = createSelectedTitleDetails();
 
 export const selectedTitle: Writable<number> = writable<number>(0);
+
+export const popstateFired: Writable<boolean> = writable<boolean>(false);
