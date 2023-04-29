@@ -6,22 +6,37 @@
 	import type { ErrorData } from '$lib/interfaces/Error';
 	import CircularProgress from '@smui/circular-progress';
 
-	let baseURL: string = `https://omdb-search-id.mtvdb.callumhopkins.au`;
+	let baseURL_OMDB: string = `https://omdb-search-id.mtvdb.callumhopkins.au`;
+	let streamingAvailability: any[] = [];
 
-	onMount(async () => {
-		await getInfo($page.params.imdbID);
+	onMount(async (): Promise<void> => {
+		getInfo($page.params.imdbID);
+		await getAvailability($page.params.imdbID);
 	});
 
 	async function getInfo(imdbID: string): Promise<void> {
 		selectedTitleDetails.loadingTrue();
 		try {
-			let res: Response = await fetch(`${baseURL}/?i=${imdbID}&plot=full`);
+			let res: Response = await fetch(`${baseURL_OMDB}/?i=${imdbID}&plot=full`);
 			let json: TitleDetailsData | ErrorData = await res.json();
 			json.Response === 'False'
 				? error.setData(json as ErrorData)
 				: selectedTitleDetails.setData(json as TitleDetailsData);
 		} catch (errorStr) {
 			console.log(errorStr);
+		}
+	}
+
+	async function getAvailability(imdbID: string): Promise<void> {
+		// const url: string = `http://127.0.0.1:8787/?imdbID=${imdbID}`;
+		const url: string = `https://streaming-availability.mtvdb.callumhopkins.au/?imdbID=${imdbID}`;
+		try {
+			const res: Response = await fetch(url);
+			const json: any = await res.json();
+			streamingAvailability[0] = json;
+			console.log(streamingAvailability);
+		} catch (errorStr) {
+			console.error(errorStr);
 		}
 	}
 </script>
@@ -37,6 +52,13 @@
 {:else}
 	<h1>{$selectedTitleDetails.Title}</h1>
 	<img src={$selectedTitleDetails.Poster} alt={$selectedTitleDetails.Title} />
+	<!-- {#await getAvailability($page.params.imdbID) then success}
+		{#if success}
+			<div>{streamingAvailability[0].streamingInfo.au}</div>
+		{:else}
+			<div>false</div>
+		{/if}
+	{/await} -->
 	<p>Year: {$selectedTitleDetails.Year}</p>
 	<p>Rated: {$selectedTitleDetails.Rated}</p>
 	<p>Released: {$selectedTitleDetails.Released}</p>
