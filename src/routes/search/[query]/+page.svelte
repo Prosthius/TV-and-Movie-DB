@@ -19,7 +19,6 @@
 
 	function handleSelectTitle(i: number): void {
 		selectedTitle.set(i);
-		goto(`/title/${$searchResults.Search[i].imdbID}`);
 	}
 
 	function handleSelectTitleEnter(event: KeyboardEvent): void {
@@ -39,7 +38,7 @@
 {:else if $searchResults.Response === 'True'}
 	{#each $searchResults.Search as movie, i}
 		<span on:click={() => handleSelectTitle(i)} on:keydown={() => handleSelectTitleEnter}>
-			<a href={`/title/${movie.imdbID}`}>
+			<a href={`/title/${movie.imdbID}/${movie.Title}`}>
 				<h3>{movie.Title}</h3>
 			</a>
 		</span>
