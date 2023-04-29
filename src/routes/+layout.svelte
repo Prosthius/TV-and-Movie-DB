@@ -22,7 +22,7 @@
 
 	setContext('searchTitle', searchTitle);
 
-	onMount(() => {
+	onMount((): void => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
 
@@ -63,7 +63,6 @@
 <TopAppBar variant="static">
 	<Row>
 		<Section>
-			<!-- TODO - refresh the page when clicked -->
 			<h4 class="title">
 				<a
 					href="/"
