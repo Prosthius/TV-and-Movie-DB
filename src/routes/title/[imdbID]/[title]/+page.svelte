@@ -7,11 +7,15 @@
 	import CircularProgress from '@smui/circular-progress';
 
 	let baseURL_OMDB: string = `https://omdb-search-id.mtvdb.callumhopkins.au`;
-	let streamingAvailability: any[] = [];
+	let streamingAvailability: any;
+	let promise: Promise<void>;
 
 	onMount(async (): Promise<void> => {
+		promise = new Promise(async (resolve, reject) => {
+			await getAvailability($page.params.imdbID);
+			resolve();
+		});
 		getInfo($page.params.imdbID);
-		await getAvailability($page.params.imdbID);
 	});
 
 	async function getInfo(imdbID: string): Promise<void> {
@@ -33,13 +37,25 @@
 		try {
 			const res: Response = await fetch(url);
 			const json: any = await res.json();
-			streamingAvailability[0] = json;
+			streamingAvailability = json;
 			console.log(streamingAvailability);
 		} catch (errorStr) {
 			console.error(errorStr);
 		}
 	}
 </script>
+
+{#await promise}
+<div>waiting...</div>
+{:then}
+<div>{streamingAvailability}</div>
+
+<!-- {#if success}
+	<div>{streamingAvailability[0].streamingInfo.au}</div>
+{:else}
+	<div>false</div>
+{/if} -->
+{/await}
 
 {#if $error.Status}
 	<div>
@@ -52,13 +68,6 @@
 {:else}
 	<h1>{$selectedTitleDetails.Title}</h1>
 	<img src={$selectedTitleDetails.Poster} alt={$selectedTitleDetails.Title} />
-	<!-- {#await getAvailability($page.params.imdbID) then success}
-		{#if success}
-			<div>{streamingAvailability[0].streamingInfo.au}</div>
-		{:else}
-			<div>false</div>
-		{/if}
-	{/await} -->
 	<p>Year: {$selectedTitleDetails.Year}</p>
 	<p>Rated: {$selectedTitleDetails.Rated}</p>
 	<p>Released: {$selectedTitleDetails.Released}</p>
