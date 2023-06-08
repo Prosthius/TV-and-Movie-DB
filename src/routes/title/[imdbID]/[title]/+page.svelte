@@ -10,7 +10,7 @@
 	} from '$lib/interfaces/StreamingAvailability';
 	import CircularProgress from '@smui/circular-progress';
 
-	let baseURL_OMDB: string = `https://omdb-search-id.mtvdb.callumhopkins.au`;
+	let baseUrl: string = 'https://api.mtvdb.callumhopkins.au';
 	let streamingAvailability: StreamingAvailability;
 	let streamingAvailabilityError: StreamingAvailabilityError;
 	let promise: Promise<void>;
@@ -26,7 +26,7 @@
 	async function getInfo(imdbID: string): Promise<void> {
 		selectedTitleDetails.loadingTrue();
 		try {
-			let res: Response = await fetch(`${baseURL_OMDB}/?i=${imdbID}&plot=full`);
+			let res: Response = await fetch(`${baseUrl}/title?imdbID=${imdbID}&plot=full`);
 			let json: TitleDetailsData | ErrorData = await res.json();
 			json.Response === 'True'
 				? selectedTitleDetails.setData(json as TitleDetailsData)
@@ -37,9 +37,8 @@
 	}
 
 	async function getAvailability(imdbID: string): Promise<void> {
-		const url: string = `https://streaming-availability.mtvdb.callumhopkins.au/?imdbID=${imdbID}`;
 		try {
-			const res: Response = await fetch(url);
+			const res: Response = await fetch(`${baseUrl}/streaming?imdbID=${imdbID}`);
 			const json: StreamingAvailability | StreamingAvailabilityError = await res.json();
 			IsStreamingAvailability(json)
 				? (streamingAvailability = json as StreamingAvailability)
@@ -50,9 +49,7 @@
 		}
 	}
 
-	function IsStreamingAvailability(
-		json: StreamingAvailability | StreamingAvailabilityError
-	): json is StreamingAvailability {
+	function IsStreamingAvailability(json: StreamingAvailability | StreamingAvailabilityError): json is StreamingAvailability {
 		return (json as StreamingAvailability).result !== undefined;
 	}
 </script>

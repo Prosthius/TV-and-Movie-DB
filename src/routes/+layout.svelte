@@ -18,7 +18,7 @@
 
 	let lightTheme: boolean;
 	let searchTitleInput: string;
-	let baseURL: string = `https://omdb-search.mtvdb.callumhopkins.au`;
+	let baseUrl: string = 'https://api.mtvdb.callumhopkins.au';
 
 	setContext('searchTitle', searchTitle);
 
@@ -37,7 +37,7 @@
 		error.errorFalse();
 		searchTitleInput = '';
 		try {
-			let res: Response = await fetch(`${baseURL}/?s=${query}`);
+			let res: Response = await fetch(`${baseUrl}/search?query=${query}`);
 			let json: SearchResultsData | ErrorData = await res.json();
 			json.Response === 'False'
 				? error.setData(json as ErrorData)
