@@ -1,5 +1,5 @@
 const handler: ExportedHandler = {
-	async fetch(request: any, env: any, ctx: any) {
+	async fetch(request: Request, env: any, ctx: ExecutionContext) {
 		const API_KEY_OMDB: string = env.API_KEY_OMDB;
 		const API_KEY_SA: string = env.API_KEY_SA;
 		let host: string;
