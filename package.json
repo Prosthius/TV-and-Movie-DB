@@ -16,7 +16,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/kv-asset-handler": "^0.3.0",
-		"@cloudflare/workers-types": "^4.20230404.0",
+		"@cloudflare/workers-types": "github:cloudflare/workers-types",
 		"@material/typography": "^14.0.0",
 		"@smui/circular-progress": "^7.0.0-beta.3",
 		"@smui/common": "^7.0.0-beta.0",
