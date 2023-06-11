@@ -8,7 +8,7 @@ DROP TABLE USERS;
 
 CREATE TABLE USERS (
     ID SERIAL PRIMARY KEY,
-    FIRSTNAME VARCHAR(50),
+    FIRSTNAME VARCHAR(50) NOT NULL,
     LASTNAME VARCHAR(50)
 );
 
@@ -60,12 +60,27 @@ CREATE TABLE RATINGS_MOVIES (
     USER_COMMENTS VARCHAR(1000) NULL
 );
 
-INSERT INTO USERS (
-    FIRSTNAME,
-    LASTNAME
-) VALUES (
-    'John',
-    'Doe'
-);
+CREATE PROCEDURE add_user(firstname VARCHAR(50), lastname VARCHAR(50))
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO USERS (
+        FIRSTNAME,
+        LASTNAME
+    ) VALUES (
+        firstname,
+        lastname
+    );
+END;
+$$;
+
+CALL add_user('John', 'Doe');
+
+-- INSERT INTO USERS (
+--     FIRSTNAME,
+--     LASTNAME
+-- ) VALUES (
+--     'John',
+--     'Doe'
+-- );
 
 -- SELECT * FROM USERS;
