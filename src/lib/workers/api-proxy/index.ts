@@ -15,25 +15,30 @@ const handler: ExportedHandler<Env> = {
 		const season = url.searchParams.get("season");
 
 		let apiUrl: string;
-		if (path === "/search" && query) {
-			host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
-			apiUrl = `${host}&s=${query}`;
-		} else if (path === "/title" && imdbID && plotLength) {
-			host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
-			apiUrl = `${host}&i=${imdbID}&plot=${plotLength}`;
-		} else if (path === "/season" && imdbID && plotLength) {
-			host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
-			apiUrl = `${host}&i=${imdbID}&plot=${plotLength}&season=${season}`;
-		} else if (path === "/streaming" && imdbID) {
-			host = 'https://streaming-availability.p.rapidapi.com/v2/get';
-			headers.set("X-RapidAPI-Key", API_KEY_SA);
-			headers.set("X-RapidAPI-Host", "streaming-availability.p.rapidapi.com");
-			apiUrl = `${host}/basic?country=au&imdb_id=${imdbID}&output_language=en`;
-		} else {
-			return new Response(JSON.stringify({ error: "Invalid URL or parameters" }), {
-				status: 400,
-				headers: headers
-			});
+		switch (path) {
+			case "/search":
+				host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
+				apiUrl = `${host}&s=${query}`;
+				break;
+			case "/title":
+				host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
+				apiUrl = `${host}&i=${imdbID}&plot=${plotLength}`;
+				break;
+			case "/season":
+				host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
+				apiUrl = `${host}&i=${imdbID}&plot=${plotLength}&season=${season}`;
+				break;
+			case "/streaming":
+				host = 'https://streaming-availability.p.rapidapi.com/v2/get';
+				headers.set("X-RapidAPI-Key", API_KEY_SA);
+				headers.set("X-RapidAPI-Host", "streaming-availability.p.rapidapi.com");
+				apiUrl = `${host}/basic?country=au&imdb_id=${imdbID}&output_language=en`;
+				break;
+			default:
+				return new Response(JSON.stringify({ error: "Invalid URL or parameters" }), {
+					status: 400,
+					headers: headers
+				});
 		}
 
 		const init = {
