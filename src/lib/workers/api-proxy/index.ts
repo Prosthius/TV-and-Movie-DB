@@ -12,6 +12,7 @@ const handler: ExportedHandler<Env> = {
 		const query = url.searchParams.get("query");
 		const imdbID = url.searchParams.get("imdbID");
 		const plotLength = url.searchParams.get("plot");
+		const season = url.searchParams.get("season");
 
 		let apiUrl: string;
 		if (path === "/search" && query) {
@@ -20,6 +21,9 @@ const handler: ExportedHandler<Env> = {
 		} else if (path === "/title" && imdbID && plotLength) {
 			host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
 			apiUrl = `${host}&i=${imdbID}&plot=${plotLength}`;
+		} else if (path === "/season" && imdbID && plotLength) {
+			host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
+			apiUrl = `${host}&i=${imdbID}&plot=${plotLength}&season=${season}`;
 		} else if (path === "/streaming" && imdbID) {
 			host = 'https://streaming-availability.p.rapidapi.com/v2/get';
 			headers.set("X-RapidAPI-Key", API_KEY_SA);
@@ -48,7 +52,6 @@ const handler: ExportedHandler<Env> = {
 		try {
 			const response = await fetch(apiUrl, init);
 			const results = await gatherResponse(response);
-
 			return new Response(results, init);
 		} catch (error: any) {
 			const errorMessage = `Error fetching data from OMDB API: ${error.message}`;
