@@ -29,7 +29,7 @@
 
 {#if $error.Status}
 	<div>
-		Error: {$error.Error}
+		{$error.Error}
 	</div>
 {:else if $searchResults.Loading}
 	<div class="centred-horizontal" style="margin-top: 70px;">
@@ -38,7 +38,7 @@
 {:else if $searchResults.Response === 'True'}
 	{#each $searchResults.Search as movie, i}
 		<span on:click={() => handleSelectTitle(i)} on:keydown={() => handleSelectTitleEnter}>
-			<a href={`/title/${movie.imdbID}/${movie.Title}`}>
+			<a href={`/title/${movie.imdbID}`}>
 				<h3>{movie.Title}</h3>
 			</a>
 		</span>

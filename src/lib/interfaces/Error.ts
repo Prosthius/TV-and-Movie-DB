@@ -11,3 +11,7 @@ export interface Error extends Writable<ErrorData> {
     errorFalse: () => void;
     setData: (json: ErrorData) => void;
 }
+
+export interface GenericError {
+    error: string
+}

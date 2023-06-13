@@ -1,7 +1,3 @@
-export interface StreamingAvailabilityError {
-    message: string;
-}
-
 export interface StreamingAvailability {
     result: {
         type: string;

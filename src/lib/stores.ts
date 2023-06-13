@@ -47,9 +47,9 @@ let selectedTitleDetailsDefault: TitleDetailsData = {
     Loading: false
 };
 
+export const searchResults: SearchResults = createSearchResults();
 function createSearchResults(): SearchResults {
     const { subscribe, set, update }: Writable<SearchResultsData> = writable<SearchResultsData>(searchResultsDefault);
-
     return {
         subscribe,
         set,
@@ -66,15 +66,14 @@ function createSearchResults(): SearchResults {
         reset: (): void => set(searchResultsDefault)
     };
 }
-export const searchResults: SearchResults = createSearchResults();
 
+export const error: Error = createError();
 function createError(): Error {
     const { subscribe, set, update }: Writable<ErrorData> = writable<ErrorData>({
         Error: '',
         Response: 'False',
         Status: false
     });
-
     return {
         subscribe,
         set,
@@ -90,11 +89,10 @@ function createError(): Error {
         }
     };
 }
-export const error: Error = createError();
 
+export const selectedTitleDetails: TitleDetails = createSelectedTitleDetails();
 function createSelectedTitleDetails(): TitleDetails {
     const { subscribe, set, update }: Writable<TitleDetailsData> = writable<TitleDetailsData>(selectedTitleDetailsDefault);
-
     return {
         subscribe,
         set,
@@ -111,6 +109,5 @@ function createSelectedTitleDetails(): TitleDetails {
         reset: (): void => set(selectedTitleDetailsDefault)
     };
 }
-export const selectedTitleDetails: TitleDetails = createSelectedTitleDetails();
 
 export const selectedTitle: Writable<number> = writable<number>(0);
