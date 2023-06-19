@@ -26,7 +26,7 @@ const handler: ExportedHandler<Env> = {
 				break;
 			case "/season":
 				host = `https://www.omdbapi.com/?apikey=${API_KEY_OMDB}`;
-				apiUrl = `${host}&i=${imdbID}&plot=${plotLength}&season=${season}`;
+				apiUrl = `${host}&i=${imdbID}&season=${season}`;
 				break;
 			case "/streaming":
 				host = 'https://streaming-availability.p.rapidapi.com/v2/get';
