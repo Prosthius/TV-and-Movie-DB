@@ -24,6 +24,7 @@ export interface TitleDetailsData {
 	totalSeasons?: string;
 	Response: string;
 	Loading: boolean;
+	Episode: string;
 }
 
 interface Rating {

@@ -44,6 +44,7 @@ let selectedTitleDetailsDefault: TitleDetailsData = {
     Type: '',
     totalSeasons: '',
     Response: '',
+    Episode: '',
     Loading: false
 };
 
