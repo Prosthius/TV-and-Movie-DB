@@ -18,8 +18,6 @@
 
 	let lightTheme: boolean;
 	let searchTitleInput: string;
-	let baseUrl: string = 'https://api.mtvdb.callumhopkins.au';
-	// let baseUrl: string = 'http://localhost:8787';
 
 	setContext('searchTitle', searchTitle);
 
@@ -38,7 +36,7 @@
 		error.errorFalse();
 		searchTitleInput = '';
 		try {
-			let res: Response = await fetch(`${baseUrl}/search?query=${query}`);
+			let res: Response = await fetch(`/api/search?query=${query}`);
 			let json: SearchResultsData | ErrorData = await res.json();
 			if (json.Response === 'True') {
 				searchResults.setData(json as SearchResultsData);
