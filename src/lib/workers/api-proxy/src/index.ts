@@ -49,14 +49,18 @@ const handler: ExportedHandler<Env> = {
 			const { headers } = response;
 			const contentType = headers.get("content-type") || "";
 			if (contentType.includes("application/json")) {
+				console.log(response);
 				return JSON.stringify(await response.json());
 			}
 			return response.text();
 		}
 
 		try {
-			const response = await fetch(apiUrl, init);
+			// const response = await fetch(apiUrl, init);
+			const apiRequest = new Request(apiUrl, init);
+			const response = await fetchAndCache(apiRequest);
 			const results = await gatherResponse(response);
+			console.log(results);
 			return new Response(results, init);
 		} catch (error: any) {
 			const errorMessage = `Error fetching data from OMDB API: ${error.message}`;
@@ -69,3 +73,29 @@ const handler: ExportedHandler<Env> = {
 };
 
 export default handler;
+
+
+async function fetchAndCache(request: Request) {
+	// Check if the response is already in the cache
+	let response: Response = await caches.default.match(request);
+	console.log(JSON.stringify(response));
+
+	if (!response) {
+		console.log('test');
+		response = await fetch(request);
+		const varyHeader = response.headers.get("Vary");
+		const [body1, body2] = response.body.tee();
+		if (varyHeader === "*") {
+			const newHeaders = new Headers(response.headers);
+			newHeaders.delete("Vary");
+			response = new Response(body1, {
+				status: response.status,
+				statusText: response.statusText,
+				headers: newHeaders
+			});
+		}
+		const cachedResponse = new Response(body2, response);
+		await caches.default.put(request, cachedResponse);
+	}
+	return response;
+}
