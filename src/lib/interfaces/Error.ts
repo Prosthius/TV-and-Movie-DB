@@ -1,15 +1,15 @@
 import type { Writable } from 'svelte/store';
 
-export interface ErrorData {
+export interface Error {
     Error: string,
     Response: string,
-    Status: boolean,
+    Status: boolean // Potentially get rid of status, not needed as Response is either true or false, but it is a string
 }
 
-export interface Error extends Writable<ErrorData> {
+export interface ErrorWritable extends Writable<Error> {
     errorTrue: () => void;
     errorFalse: () => void;
-    setData: (json: ErrorData) => void;
+    setData: (json: Error) => void;
 }
 
 export interface GenericError {

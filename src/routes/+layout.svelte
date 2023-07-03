@@ -2,8 +2,8 @@
 	import '../app.scss';
 	import { onMount, setContext } from 'svelte';
 	import { goto } from '$app/navigation';
-	import type { SearchResultsData } from '$lib/interfaces/SearchResults';
-	import type { ErrorData } from '$lib/interfaces/Error';
+	import type { SearchResults } from '$lib/interfaces/SearchResults';
+	import type { Error } from '$lib/interfaces/Error';
 	import { searchResults, error } from '$lib/stores';
 	import { page } from '$app/stores';
 	import { Icon } from '@smui/common';
@@ -18,6 +18,7 @@
 
 	let lightTheme: boolean;
 	let searchTitleInput: string;
+	let noSearchQuery: Boolean;
 
 	setContext('searchTitle', searchTitle);
 
@@ -25,28 +26,34 @@
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
 
-	function handleSearchEnterPress(event: CustomEvent | KeyboardEvent): void {
+	function handleSearchEnterPress(event: KeyboardEvent | CustomEvent): void {
 		event = event as KeyboardEvent;
-		event.key === 'Enter' ? searchTitle(searchTitleInput, true) : null;
+		event.key === 'Enter' ? searchTitle(searchTitleInput) : null;
 	}
 
-	async function searchTitle(query: string, pageNav: Boolean): Promise<void> {
-		searchResults.loadingTrue();
-		pageNav ? goto(`/search/${encodeURIComponent(query)}`) : null;
-		error.errorFalse();
-		searchTitleInput = '';
+	async function searchTitle(query: string): Promise<void> {
 		try {
-			let res: Response = await fetch(`/api/search?query=${query}`);
-			let json: SearchResultsData | ErrorData = await res.json();
-			if (json.Response === 'True') {
-				searchResults.setData(json as SearchResultsData);
+			searchResults.loadingTrue();
+			if (query) {
+				noSearchQuery = false;
+				goto(`/search/${encodeURIComponent(query)}`);
 			} else {
-				error.setData(json as ErrorData);
+				noSearchQuery = true;
+				throw new Error('No query');
+			}
+			error.errorFalse();
+			searchTitleInput = '';
+			let res: Response = await fetch(`/api/search?query=${query}`);
+			let json: SearchResults | Error = await res.json();
+			if (json.Response === 'True') {
+				searchResults.setData(json as SearchResults);
+			} else {
+				error.setData(json as Error);
 				error.errorTrue();
 			}
 		} catch (errorStr) {
 			console.log(errorStr);
-			error.set({ Error: errorStr, Response: 'False', Status: true } as ErrorData);
+			error.set({ Error: errorStr, Response: 'False', Status: true } as Error);
 		}
 	}
 </script>
@@ -108,11 +115,16 @@
 					class="input"
 				/>
 			</Paper>
-			<Fab on:click={() => searchTitle($page.params.query, true)} color="primary" mini class="fab">
+			<Fab on:click={() => searchTitle($page.params.query)} color="primary" mini class="fab">
 				<Icon class="material-icons">arrow_forward</Icon>
 			</Fab>
 		</Cell>
 	</LayoutGrid>
+	{#if noSearchQuery}
+		<div class="centre">
+			<div style="color: red;">Please enter a search query</div>
+		</div>
+	{/if}
 </div>
 
 <slot />

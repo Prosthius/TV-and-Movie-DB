@@ -1,12 +1,12 @@
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { SearchResults, SearchResultsData } from '$lib/interfaces/SearchResults';
-import type { ErrorData, Error } from '$lib/interfaces/Error';
-import type { TitleDetailsData, TitleDetails } from '$lib/interfaces/TitleDetails';
+import type { SearchResultsWritable, SearchResults } from '$lib/interfaces/SearchResults';
+import type { Error, ErrorWritable } from '$lib/interfaces/Error';
+import type { TitleDetails, TitleDetailsWritable } from '$lib/interfaces/TitleDetails';
 
 // TODO - move each variable to separate files
 
-let searchResultsDefault: SearchResultsData = {
+let searchResultsDefault: SearchResults = {
     Search: [
         {
             Title: '',
@@ -21,7 +21,7 @@ let searchResultsDefault: SearchResultsData = {
     Response: 'False'
 };
 
-let selectedTitleDetailsDefault: TitleDetailsData = {
+let selectedTitleDetailsDefault: TitleDetails = {
     Title: '',
     Year: '',
     Rated: '',
@@ -45,20 +45,21 @@ let selectedTitleDetailsDefault: TitleDetailsData = {
     totalSeasons: '',
     Response: '',
     Episode: '',
+    Season: '',
     Loading: false
 };
 
-export const searchResults: SearchResults = createSearchResults();
-function createSearchResults(): SearchResults {
-    const { subscribe, set, update }: Writable<SearchResultsData> = writable<SearchResultsData>(searchResultsDefault);
+export const searchResults: SearchResultsWritable = createSearchResults();
+function createSearchResults(): SearchResultsWritable {
+    const { subscribe, set, update }: Writable<SearchResults> = writable<SearchResults>(searchResultsDefault);
     return {
         subscribe,
         set,
         update,
         loadingTrue: (): void => update(state => ({ ...state, Loading: true })),
         loadingFalse: (): void => update(state => ({ ...state, Loading: false })),
-        setData: (json: SearchResultsData): void => {
-            update((storeValue: SearchResultsData): SearchResultsData => {
+        setData: (json: SearchResults): void => {
+            update((storeValue: SearchResults): SearchResults => {
                 storeValue = { ...storeValue, ...json };
                 storeValue.Loading = false;
                 return storeValue;
@@ -68,9 +69,9 @@ function createSearchResults(): SearchResults {
     };
 }
 
-export const error: Error = createError();
-function createError(): Error {
-    const { subscribe, set, update }: Writable<ErrorData> = writable<ErrorData>({
+export const error: ErrorWritable = createError();
+function createError(): ErrorWritable {
+    const { subscribe, set, update }: Writable<Error> = writable<Error>({
         Error: '',
         Response: 'False',
         Status: false
@@ -81,8 +82,8 @@ function createError(): Error {
         update,
         errorTrue: (): void => update(state => ({ ...state, Status: true })),
         errorFalse: (): void => update(state => ({ ...state, Status: false })),
-        setData: (json: ErrorData): void => {
-            update((storeValue: ErrorData): ErrorData => {
+        setData: (json: Error): void => {
+            update((storeValue: Error): Error => {
                 storeValue = { ...storeValue, ...json };
                 storeValue.Status = true;
                 return storeValue;
@@ -91,17 +92,17 @@ function createError(): Error {
     };
 }
 
-export const selectedTitleDetails: TitleDetails = createSelectedTitleDetails();
-function createSelectedTitleDetails(): TitleDetails {
-    const { subscribe, set, update }: Writable<TitleDetailsData> = writable<TitleDetailsData>(selectedTitleDetailsDefault);
+export const selectedTitleDetails: TitleDetailsWritable = createSelectedTitleDetails();
+function createSelectedTitleDetails(): TitleDetailsWritable {
+    const { subscribe, set, update }: Writable<TitleDetails> = writable<TitleDetails>(selectedTitleDetailsDefault);
     return {
         subscribe,
         set,
         update,
         loadingTrue: (): void => update(state => ({ ...state, Loading: true })),
         loadingFalse: (): void => update(state => ({ ...state, Loading: false })),
-        setData: (json: TitleDetailsData): void => {
-            update((storeValue: TitleDetailsData): TitleDetailsData => {
+        setData: (json: TitleDetails): void => {
+            update((storeValue: TitleDetails): TitleDetails => {
                 storeValue = { ...storeValue, ...json };
                 storeValue.Loading = false;
                 return storeValue;

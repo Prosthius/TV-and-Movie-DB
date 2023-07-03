@@ -14,7 +14,8 @@
 	const searchTitle: (query: string, pageNav: Boolean) => Promise<void> = getContext('searchTitle');
 
 	onMount(async () => {
-		await searchTitle($page.params.query, false);
+		// Results in two calls to the API if search made through search bar from a different page
+		await searchTitle($page.params.query);
 	});
 
 	function handleSelectTitle(i: number): void {

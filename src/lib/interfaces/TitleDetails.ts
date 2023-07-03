@@ -1,6 +1,6 @@
 import type { Writable } from "svelte/store";
 
-export interface TitleDetailsData {
+export interface TitleDetails {
 	Title: string;
 	Year: string;
 	Rated: string;
@@ -25,6 +25,7 @@ export interface TitleDetailsData {
 	Response: string;
 	Loading: boolean;
 	Episode: string;
+	Season: string;
 }
 
 interface Rating {
@@ -32,9 +33,9 @@ interface Rating {
 	Value: string;
 }
 
-export interface TitleDetails extends Writable<TitleDetailsData> {
+export interface TitleDetailsWritable extends Writable<TitleDetails> {
 	loadingTrue: () => void;
 	loadingFalse: () => void;
-	setData: (json: TitleDetailsData) => void;
+	setData: (json: TitleDetails) => void;
 	reset: () => void;
 }

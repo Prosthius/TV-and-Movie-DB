@@ -2,15 +2,13 @@
 	import { onMount } from 'svelte';
 	import { selectedTitleDetails, error } from '$lib/stores';
 	import { page } from '$app/stores';
-	import type { TitleDetailsData } from '$lib/interfaces/TitleDetails';
-	import type { ErrorData, GenericError } from '$lib/interfaces/Error';
+	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
+	import type { Error, GenericError } from '$lib/interfaces/Error';
 	import type { StreamingAvailability } from '$lib/interfaces/StreamingAvailability';
 	import CircularProgress from '@smui/circular-progress';
 	import Fab from '@smui/fab';
 	import { goto } from '$app/navigation';
 
-	let baseUrl: string = 'https://api.mtvdb.callumhopkins.au';
-	// let baseUrl: string = 'http://localhost:8787';
 	let streamingAvailability: StreamingAvailability;
 	let genericError: GenericError;
 	let promise: Promise<void>;
@@ -28,23 +26,23 @@
 		selectedTitleDetails.loadingTrue();
 		error.errorFalse();
 		try {
-			let res: Response = await fetch(`${baseUrl}/title?imdbID=${imdbID}&plot=full`);
-			let json: TitleDetailsData | ErrorData = await res.json();
+			let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=full`);
+			let json: TitleDetails | Error = await res.json();
 			if (json.Response === 'True') {
-				selectedTitleDetails.setData(json as TitleDetailsData);
+				selectedTitleDetails.setData(json as TitleDetails);
 			} else {
-				error.setData(json as ErrorData);
+				error.setData(json as Error);
 				error.errorTrue();
 			}
 		} catch (errorStr: unknown) {
 			console.log(errorStr);
-			error.set({ Error: errorStr, Response: 'False', Status: true } as ErrorData);
+			error.set({ Error: errorStr, Response: 'False', Status: true } as Error);
 		}
 	}
 
 	async function getAvailability(imdbID: string): Promise<void> {
 		try {
-			const res: Response = await fetch(`${baseUrl}/streaming?imdbID=${imdbID}`);
+			const res: Response = await fetch(`/api/streaming?imdbID=${imdbID}`);
 			const json: StreamingAvailability | GenericError = await res.json();
 			IsStreamingAvailability(json)
 				? (streamingAvailability = json as StreamingAvailability)
@@ -67,7 +65,6 @@
 	}
 </script>
 
-<!-- TODO: add seasons to page using https://api.mtvdb.callumhopkins.au/season -->
 {#await promise}
 	<div class="centred-horizontal" style="margin-top: 70px;">
 		<CircularProgress style="height: 100px; width: 100px" indeterminate />

@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { error } from '$lib/stores';
-	import type { Season } from '$lib/interfaces/Season';
-	import type { TitleDetailsData } from '$lib/interfaces/TitleDetails';
+	import { selectedTitleDetails, error } from '$lib/stores';
+	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
 	import CircularProgress from '@smui/circular-progress';
 	import Accordion, { Panel, Header, Content } from '@smui-extra/accordion';
 	import IconButton, { Icon } from '@smui/icon-button';
 	import Select, { Option } from '@smui/select';
 	import { goto } from '$app/navigation';
 
-	let baseURI: string = 'https://api.mtvdb.callumhopkins.au';
-	let season: Season;
-	let episodeDetails: TitleDetailsData[] = [];
+	let episodes: TitleDetails[] = [];
 	let promise: Promise<void> = new Promise(() => {});
 	let loadEpisodesPromise: Promise<void>;
 	let panelOpen: boolean[] = [false];
@@ -22,44 +19,33 @@
 
 	onMount(async (): Promise<void> => {
 		promise = new Promise(async (resolve, reject) => {
-			await loadEpisodes();
+			getShowDetails(currentImdbID);
+			await getSeason(currentImdbID, parseInt(selectedSeason));
 			resolve();
 		});
 	});
 
-	async function loadEpisodes(): Promise<void> {
-		let episodePromises: Promise<void>[] = [new Promise<void>(() => {})];
-		await getSeason(currentImdbID, parseInt(selectedSeason));
-		episodeDetails = [];
-		episodePromises = season.Episodes.map((episode) => getEpisode(episode.imdbID));
-		await Promise.all(episodePromises);
-		// Ensures that episodes are ordered from lowest to highest in the array
-		episodeDetails.sort((a, b) => parseInt(a.Episode) - parseInt(b.Episode));
-		for (let i: number = 0; i < parseInt(season.totalSeasons); i++) {
-			totalSeasons.push((i + 1).toString());
-		}
-	}
-
-	async function getSeason(imdbID: string, seasonNum: number): Promise<void> {
+	async function getShowDetails(imdbID: string): Promise<void> {
 		error.errorFalse();
 		try {
-			let res: Response = await fetch(
-				`${baseURI}/season?imdbID=${imdbID}&season=${seasonNum}`
-			);
-			let json: Season = await res.json();
-			season = json;
+			let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=short`);
+			let json: TitleDetails = await res.json();
+			selectedTitleDetails.set(json);
+			for (let i: number = 0; i < parseInt($selectedTitleDetails.totalSeasons as string); i++) {
+				totalSeasons.push((i + 1).toString());
+			}
 		} catch (errorStr: unknown) {
 			console.log(errorStr);
 			error.errorTrue();
 		}
 	}
 
-	async function getEpisode(imdbID: string) {
+	async function getSeason(imdbID: string, seasonNum: number): Promise<void> {
 		error.errorFalse();
 		try {
-			let res: Response = await fetch(`${baseURI}/title?imdbID=${imdbID}&plot=short`);
-			let json: TitleDetailsData = await res.json();
-			episodeDetails.push(json);
+			let res: Response = await fetch(`/api/season?imdbID=${imdbID}&season=${seasonNum}`);
+			let json: TitleDetails[] = await res.json();
+			episodes = json;
 		} catch (errorStr: unknown) {
 			console.log(errorStr);
 			error.errorTrue();
@@ -70,7 +56,7 @@
 		if (selectedSeason !== $page.params.seasonNo) {
 			goto(`/title/${currentImdbID}/season=${selectedSeason}`);
 			loadEpisodesPromise = new Promise(async (resolve, reject) => {
-				await loadEpisodes();
+				await getSeason(currentImdbID, parseInt(selectedSeason));
 				resolve();
 			});
 		}
@@ -82,7 +68,7 @@
 		<CircularProgress style="height: 100px; width: 100px" indeterminate />
 	</div>
 {:then}
-	<h3>{season.Title}</h3>
+	<h3>{$selectedTitleDetails.Title}</h3>
 	<h4>Season {selectedSeason}</h4>
 	<div class="columns margins" style="justify-content: flex-start;">
 		<div>
@@ -100,18 +86,18 @@
 	{:then}
 		<div class="accordion-container">
 			<Accordion multiple>
-				{#each episodeDetails as episode, i}
+				{#each episodes as ep, i}
 					<Panel bind:open={panelOpen[i]}>
 						<Header>
-							{episode.Episode}: {episode.Title}
-							<span slot="description">{episode.imdbRating} ({episodeDetails[i].imdbVotes})</span>
+							{ep.Episode}: {ep.Title}
+							<span slot="description">{ep.imdbRating} ({ep.imdbVotes})</span>
 							<IconButton slot="icon" toggle pressed={panelOpen[i]}>
 								<Icon class="material-icons" on>expand_less</Icon>
 								<Icon class="material-icons">expand_more</Icon>
 							</IconButton>
 						</Header>
 						<Content>
-							{episodeDetails[i].Plot}
+							{ep.Plot}
 						</Content>
 					</Panel>
 				{/each}
