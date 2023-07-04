@@ -75,11 +75,26 @@ strong {
 }
 
 .border {
-	border: 1px solid red;
+  border: 1px solid red;
 }
 
 .centre {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.centred-vertical {
+  display: flex;
+  align-items: center;
+}
+
+.centred-horizontal {
+  display: flex;
+  justify-content: center;
+}
+
+.loading.centred-horizontal {
+  margin: 100px auto;
+  padding-bottom: 100px;
 }

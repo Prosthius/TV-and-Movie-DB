@@ -1,23 +1,27 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { selectedTitleDetails, error } from '$lib/stores';
 	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
 	import CircularProgress from '@smui/circular-progress';
-	import Accordion, { Panel, Header, Content } from '@smui-extra/accordion';
-	import IconButton, { Icon } from '@smui/icon-button';
 	import Select, { Option } from '@smui/select';
+	import Paper, { Title, Subtitle } from '@smui/paper';
+	import LayoutGrid, { Cell } from '@smui/layout-grid';
+	import Fab from '@smui/fab';
 	import { goto } from '$app/navigation';
+	import InnerGrid from '@smui/layout-grid/src/InnerGrid.svelte';
+	import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+	import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
 
 	let episodes: TitleDetails[] = [];
 	let promise: Promise<void> = new Promise(() => {});
 	let loadEpisodesPromise: Promise<void>;
-	let panelOpen: boolean[] = [false];
 	let totalSeasons: string[] = [];
-	let selectedSeason: string = $page.params.seasonNo;
+	let selectedSeason: string;
 	$: currentImdbID = $page.params.imdbID;
 
 	onMount(async (): Promise<void> => {
+		selectedSeason = $page.params.seasonNo;
 		promise = new Promise(async (resolve, reject) => {
 			getShowDetails(currentImdbID);
 			await getSeason(currentImdbID, parseInt(selectedSeason));
@@ -63,59 +67,107 @@
 	}
 </script>
 
-{#await promise}
-	<div class="centred-horizontal" style="margin-top: 70px;">
-		<CircularProgress style="height: 100px; width: 100px" indeterminate />
-	</div>
-{:then}
-	<h3>{$selectedTitleDetails.Title}</h3>
-	<h4>Season {selectedSeason}</h4>
-	<div class="columns margins" style="justify-content: flex-start;">
-		<div>
-			<Select bind:value={selectedSeason} on:click={changeSeason} label="Select Menu">
-				{#each totalSeasons as seasonNum}
-					<Option value={seasonNum}>Season {seasonNum}</Option>
-				{/each}
-			</Select>
-		</div>
-	</div>
-	{#await loadEpisodesPromise}
-		<div class="centred-horizontal" style="margin-top: 70px;">
+<div class="max-width">
+	{#await promise}
+		<div class="loading centred-horizontal">
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
 	{:then}
-		<div class="accordion-container">
-			<Accordion multiple>
-				{#each episodes as ep, i}
-					<Panel bind:open={panelOpen[i]}>
-						<Header>
-							{ep.Episode}: {ep.Title}
-							<span slot="description">{ep.imdbRating} ({ep.imdbVotes})</span>
-							<IconButton slot="icon" toggle pressed={panelOpen[i]}>
-								<Icon class="material-icons" on>expand_less</Icon>
-								<Icon class="material-icons">expand_more</Icon>
-							</IconButton>
-						</Header>
-						<Content>
-							{ep.Plot}
-						</Content>
-					</Panel>
-				{/each}
-			</Accordion>
+		<div class="container">
+			<Fab on:click={() => goto(`/title/${$page.params.imdbID}`)} color="primary" extended>
+				Back to Show Details
+			</Fab>
 		</div>
+		<div class="container">
+			<Paper color="secondary" elevation={24}>
+				<LayoutGrid>
+					<Cell spanDevices={{desktop: 6, tablet: 4, phone: 4}}>
+						<h3 style="margin: 0;">{$selectedTitleDetails.Title}</h3>
+						<h4 style="margin: 10px auto;">Season {selectedSeason}</h4>
+					</Cell>
+					<Cell spanDevices={{desktop: 6, tablet: 4, phone: 4}}>
+						<div style="margin: 0;">
+							<Select bind:value={selectedSeason} on:click={changeSeason}>
+								{#each totalSeasons as seasonNum}
+									<Option value={seasonNum}>Season {seasonNum}</Option>
+								{/each}
+							</Select>
+						</div>
+						<h5 style="margin: 15px auto;">{$selectedTitleDetails.totalSeasons} Total Seasons</h5>
+					</Cell>
+					<Cell span={3} />
+				</LayoutGrid>
+			</Paper>
+		</div>
+		{#await loadEpisodesPromise}
+			<div class="loading centred-horizontal">
+				<CircularProgress style="height: 100px; width: 100px" indeterminate />
+			</div>
+		{:then}
+			{#each episodes as ep}
+				<div class="container">
+					<Paper color="secondary">
+						<LayoutGrid>
+							<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }} class="img">
+								<img src={ep.Poster} alt="{ep.Season}.{ep.Episode} - {ep.Title} poster" />
+							</Cell>
+							<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }}>
+								<InnerGrid>
+									<Cell spanDevices={{ desktop: 9, tablet: 6, phone: 3 }}>
+										<a href={`/title/${ep.imdbID}`}>
+											<Title>{ep.Season}.{ep.Episode}<br />{ep.Title}</Title>
+										</a>
+										<div style="opacity: 70%;">
+											<span class="move">{ep.imdbRating}</span>
+											<FontAwesomeIcon class="icon" icon={faStar} />
+											({ep.imdbVotes})
+										</div>
+									</Cell>
+									<Cell spanDevices={{ desktop: 3, tablet: 2, phone: 1 }}>
+										{ep.Released}
+									</Cell>
+									<Cell span={12}>
+										{ep.Plot}
+									</Cell>
+								</InnerGrid>
+							</Cell>
+						</LayoutGrid>
+					</Paper>
+				</div>
+			{/each}
+		{/await}
 	{/await}
-{/await}
+</div>
 
 <style>
-	.accordion-container {
+	.container {
 		padding: 24px;
 	}
 
-	* :global(.smui-accordion) {
-		margin: 0 12px 24px;
+	.max-width {
+		max-width: 1000px;
+		margin: 0 auto;
 	}
 
-	* :global(.smui-accordion:last-child) {
-		margin-bottom: 0;
+	.move {
+		transform: translate(0px, 0px);
+		display: inline-block;
 	}
+
+	* :global(.icon) {
+		color: yellow;
+	}
+
+	* :global(.move-span) {
+		margin-left: 25px;
+	}
+
+	* :global(.img) {
+		display: inline-block;
+		min-width: 302px;
+	}
+
+	/* * :global(.smui-accordion .smui-accordion__panel > .smui-accordion__header .smui-accordion__header__title.smui-accordion__header__title--with-description) {
+		max-width: fit-content;
+	} */
 </style>

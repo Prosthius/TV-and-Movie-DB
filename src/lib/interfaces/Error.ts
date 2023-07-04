@@ -12,6 +12,6 @@ export interface ErrorWritable extends Writable<Error> {
     setData: (json: Error) => void;
 }
 
-export interface GenericError {
-    error: string
+export interface StreamingError {
+    message: string;
 }

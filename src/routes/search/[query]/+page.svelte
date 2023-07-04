@@ -11,20 +11,16 @@
 	import Fab from '@smui/fab/src/Fab.svelte';
 	import CircularProgress from '@smui/circular-progress';
 
-	const searchTitle: (query: string, pageNav: Boolean) => Promise<void> = getContext('searchTitle');
+	const searchTitle: (query: string) => Promise<void> = getContext('searchTitle');
 
 	onMount(async () => {
 		// Results in two calls to the API if search made through search bar from a different page
 		await searchTitle($page.params.query);
 	});
 
-	function handleSelectTitle(i: number): void {
-		selectedTitle.set(i);
-	}
-
 	function handleSelectTitleEnter(event: KeyboardEvent): void {
 		const value: number = parseInt((event.target as HTMLInputElement).value);
-		event.key === 'Enter' ? handleSelectTitle(value) : null;
+		event.key === 'Enter' ? selectedTitle.set(value) : null;
 	}
 </script>
 
@@ -33,12 +29,12 @@
 		{$error.Error}
 	</div>
 {:else if $searchResults.Loading}
-	<div class="centred-horizontal" style="margin-top: 70px;">
+	<div class="loading centred-horizontal">
 		<CircularProgress style="height: 100px; width: 100px" indeterminate />
 	</div>
 {:else if $searchResults.Response === 'True'}
 	{#each $searchResults.Search as movie, i}
-		<span on:click={() => handleSelectTitle(i)} on:keydown={() => handleSelectTitleEnter}>
+		<span on:click={() => selectedTitle.set(i)} on:keydown={() => handleSelectTitleEnter}>
 			<a href={`/title/${movie.imdbID}`}>
 				<h3>{movie.Title}</h3>
 			</a>

@@ -20,11 +20,12 @@ export interface TitleDetails {
 	imdbRating: string;
 	imdbVotes: string;
 	imdbID: string;
+	seriesID?: string;
 	Type: string;
 	totalSeasons?: string;
 	Response: string;
 	Loading: boolean;
-	Episode: string;
+	Episode?: string;
 	Season: string;
 }
 

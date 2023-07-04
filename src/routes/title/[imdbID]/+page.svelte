@@ -3,14 +3,14 @@
 	import { selectedTitleDetails, error } from '$lib/stores';
 	import { page } from '$app/stores';
 	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
-	import type { Error, GenericError } from '$lib/interfaces/Error';
+	import type { Error, StreamingError } from '$lib/interfaces/Error';
 	import type { StreamingAvailability } from '$lib/interfaces/StreamingAvailability';
 	import CircularProgress from '@smui/circular-progress';
 	import Fab from '@smui/fab';
 	import { goto } from '$app/navigation';
 
 	let streamingAvailability: StreamingAvailability;
-	let genericError: GenericError;
+	let streamingError: StreamingError;
 	let promise: Promise<void>;
 
 	onMount(async (): Promise<void> => {
@@ -43,19 +43,17 @@
 	async function getAvailability(imdbID: string): Promise<void> {
 		try {
 			const res: Response = await fetch(`/api/streaming?imdbID=${imdbID}`);
-			const json: StreamingAvailability | GenericError = await res.json();
+			const json: StreamingAvailability | StreamingError = await res.json();
 			IsStreamingAvailability(json)
 				? (streamingAvailability = json as StreamingAvailability)
-				: (genericError = json as GenericError);
-			console.log(streamingAvailability, genericError);
+				: (streamingError = json as StreamingError);
 		} catch (errorStr: unknown) {
 			console.error(errorStr);
-			genericError = errorStr as GenericError;
 		}
 	}
 
 	function IsStreamingAvailability(
-		json: StreamingAvailability | GenericError
+		json: StreamingAvailability | StreamingError
 	): json is StreamingAvailability {
 		return (json as StreamingAvailability).result !== undefined;
 	}
@@ -66,23 +64,34 @@
 </script>
 
 {#await promise}
-	<div class="centred-horizontal" style="margin-top: 70px;">
+	<div class="loading centred-horizontal">
 		<CircularProgress style="height: 100px; width: 100px" indeterminate />
 	</div>
 {:then}
-	{#if $error.Status || genericError}
+	{#if $error.Status}
 		<div>
-			{$error.Error || genericError}
+			{$error.Error}
 		</div>
 	{:else if $selectedTitleDetails.Loading === true}
-		<div class="centred-horizontal" style="margin-top: 70px;">
+		<div class="loading centred-horizontal">
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
 	{:else}
 		{#if $selectedTitleDetails.Type === 'series'}
-			<Fab on:click={() => goToSeasons($page.params.imdbID, 1)} extended>Episode Guide</Fab>
+			<Fab on:click={() => goToSeasons($page.params.imdbID, 1)} color="primary" extended
+				>Episode Guide</Fab
+			>
+		{:else if $selectedTitleDetails.Type === 'episode'}
+			<Fab
+				on:click={() =>
+					goToSeasons(
+						String($selectedTitleDetails.seriesID),
+						parseInt($selectedTitleDetails.Season)
+					)}
+				extended>Episode Guide</Fab
+			>
 		{/if}
-		<h1>{$selectedTitleDetails.Title}</h1>
+		<h2>{$selectedTitleDetails.Title}</h2>
 		<img src={$selectedTitleDetails.Poster} alt={$selectedTitleDetails.Title} />
 		<h6>Streaming Services</h6>
 		{#if streamingAvailability}

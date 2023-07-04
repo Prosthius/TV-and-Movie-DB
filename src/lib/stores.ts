@@ -41,6 +41,7 @@ let selectedTitleDetailsDefault: TitleDetails = {
     imdbRating: '',
     imdbVotes: '',
     imdbID: '',
+    seriesID: '',
     Type: '',
     totalSeasons: '',
     Response: '',
