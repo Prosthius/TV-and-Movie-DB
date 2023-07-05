@@ -78,9 +78,9 @@
 		</div>
 	{:else}
 		{#if $selectedTitleDetails.Type === 'series'}
-			<Fab on:click={() => goToSeasons($page.params.imdbID, 1)} color="primary" extended
-				>Episode Guide</Fab
-			>
+			<Fab on:click={() => goToSeasons($page.params.imdbID, 1)} color="primary" extended>
+				Episode Guide
+			</Fab>
 		{:else if $selectedTitleDetails.Type === 'episode'}
 			<Fab
 				on:click={() =>
@@ -88,8 +88,8 @@
 						String($selectedTitleDetails.seriesID),
 						parseInt($selectedTitleDetails.Season)
 					)}
-				extended>Episode Guide</Fab
-			>
+				extended>Episode Guide
+			</Fab>
 		{/if}
 		<h2>{$selectedTitleDetails.Title}</h2>
 		<img src={$selectedTitleDetails.Poster} alt={$selectedTitleDetails.Title} />

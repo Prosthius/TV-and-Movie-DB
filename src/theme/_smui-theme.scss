@@ -8,7 +8,8 @@
 	$secondary: color.scale(#d8d8d2),
 	$surface: #fff,
 	$background: rgba(0, 0, 0, 0.03),
-	$error: color-palette.$red-900);
+	$error: color-palette.$red-900
+);
 
 html,
 body {
@@ -22,5 +23,5 @@ a {
 }
 
 a:hover {
-	color: #40b3ff;
+	color: #a19100d8;
 }

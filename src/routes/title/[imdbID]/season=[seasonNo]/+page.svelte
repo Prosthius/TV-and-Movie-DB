@@ -67,7 +67,7 @@
 	}
 </script>
 
-<div class="max-width">
+<div class="body">
 	{#await promise}
 		<div class="loading centred-horizontal">
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
@@ -79,13 +79,13 @@
 			</Fab>
 		</div>
 		<div class="container">
-			<Paper color="secondary" elevation={24}>
+			<Paper color="secondary">
 				<LayoutGrid>
-					<Cell spanDevices={{desktop: 6, tablet: 4, phone: 4}}>
+					<Cell spanDevices={{ desktop: 6, tablet: 4, phone: 4 }}>
 						<h3 style="margin: 0;">{$selectedTitleDetails.Title}</h3>
 						<h4 style="margin: 10px auto;">Season {selectedSeason}</h4>
 					</Cell>
-					<Cell spanDevices={{desktop: 6, tablet: 4, phone: 4}}>
+					<Cell spanDevices={{ desktop: 6, tablet: 4, phone: 4 }}>
 						<div style="margin: 0;">
 							<Select bind:value={selectedSeason} on:click={changeSeason}>
 								{#each totalSeasons as seasonNum}
@@ -106,9 +106,9 @@
 		{:then}
 			{#each episodes as ep}
 				<div class="container">
-					<Paper color="secondary">
+					<Paper>
 						<LayoutGrid>
-							<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }} class="img">
+							<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }}>
 								<img src={ep.Poster} alt="{ep.Season}.{ep.Episode} - {ep.Title} poster" />
 							</Cell>
 							<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }}>
@@ -144,7 +144,7 @@
 		padding: 24px;
 	}
 
-	.max-width {
+	.body {
 		max-width: 1000px;
 		margin: 0 auto;
 	}
@@ -162,12 +162,12 @@
 		margin-left: 25px;
 	}
 
-	* :global(.img) {
-		display: inline-block;
-		min-width: 302px;
+	img {
+		max-width: 100%;
 	}
 
-	/* * :global(.smui-accordion .smui-accordion__panel > .smui-accordion__header .smui-accordion__header__title.smui-accordion__header__title--with-description) {
-		max-width: fit-content;
-	} */
+	* :global(.smui-paper.smui-paper--color-secondary.smui-paper--raised.smui-paper--elevation-z1) {
+		box-shadow: 0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14),
+			0px 4px 18px 3px rgba(0, 0, 0, 0.12);
+	}
 </style>
