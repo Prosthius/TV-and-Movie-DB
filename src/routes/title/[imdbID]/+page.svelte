@@ -16,10 +16,12 @@
 	onMount(async (): Promise<void> => {
 		promise = new Promise(async (resolve, reject) => {
 			selectedTitleDetails.reset();
-			await getAvailability($page.params.imdbID);
+			await Promise.all([
+				getAvailability($page.params.imdbID),
+				getInfo($page.params.imdbID),
+			]);
 			resolve();
 		});
-		getInfo($page.params.imdbID);
 	});
 
 	async function getInfo(imdbID: string): Promise<void> {
@@ -88,13 +90,14 @@
 						String($selectedTitleDetails.seriesID),
 						parseInt($selectedTitleDetails.Season)
 					)}
-				extended>Episode Guide
+				extended
+				>Episode Guide
 			</Fab>
 		{/if}
 		<h2>{$selectedTitleDetails.Title}</h2>
 		<img src={$selectedTitleDetails.Poster} alt={$selectedTitleDetails.Title} />
 		<h6>Streaming Services</h6>
-		{#if streamingAvailability}
+		{#if streamingAvailability?.result.streamingInfo.au}
 			{#each Object.keys(streamingAvailability.result.streamingInfo.au) as service}
 				<div><ul>{service}:</ul></div>
 				{#each streamingAvailability.result.streamingInfo.au[service] as streamingService}

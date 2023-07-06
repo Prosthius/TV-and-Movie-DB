@@ -4,30 +4,30 @@ export interface StreamingAvailability {
         title: string;
         overview: string;
         streamingInfo: {
-            au: {
+            au?: {
                 [service: string]: StreamingService[];
             };
         };
         cast: string[];
         year: number;
         advisedMinimumAudienceAge?: number;
-        imdbId?: string;
-        imdbRating?: number;
-        imdbVoteCount?: number;
-        tmdbId?: number;
-        tmdbRating?: number;
-        originalTitle?: string;
-        backdropPath?: string;
-        backdropURLs?: { [key: string]: string };
-        genres?: { id: number; name: string }[];
+        imdbId: string;
+        imdbRating: number;
+        imdbVoteCount: number;
+        tmdbId: number;
+        tmdbRating: number;
+        originalTitle: string;
+        backdropPath: string;
+        backdropURLs: { [key: string]: string };
+        genres: { id: number; name: string }[];
         originalLanguage?: string;
-        countries?: string[];
-        directors?: string[];
-        runtime?: number;
-        youtubeTrailerVideoId?: string;
-        youtubeTrailerVideoLink?: string;
-        posterPath?: string;
-        posterURLs?: { [key: string]: string };
+        countries: string[];
+        directors: string[];
+        runtime: number;
+        youtubeTrailerVideoId: string;
+        youtubeTrailerVideoLink: string;
+        posterPath: string;
+        posterURLs: { [key: string]: string };
         tagline: string
     };
 }

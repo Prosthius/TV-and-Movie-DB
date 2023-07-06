@@ -14,9 +14,8 @@
 
 	const searchTitle: (query: string) => Promise<void> = getContext('searchTitle');
 
-	onMount(async () => {
-		// Results in two calls to the API if search made through search bar from a different page
-		await searchTitle($page.params.query);
+	onMount(() => {
+		$searchResults.Loading ? null : searchTitle($page.params.query);
 	});
 
 	function handleSelectTitleEnter(event: KeyboardEvent): void {
@@ -47,26 +46,24 @@
 							<img src={title.Poster} alt="{title.Title} poster" />
 						</Cell>
 						<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 2 }}>
-							<InnerGrid>
-								<Cell span={12}>
-									<a
-										href={`/title/${title.imdbID}`}
-										on:click={() => selectedTitle.set(i)}
-										on:keydown={() => handleSelectTitleEnter}
-									>
-										<h4>{title.Title}</h4>
-									</a>
-									<p>{title.Year}</p>
-									<p>{capitaliseFirstLetter(title.Type)}</p>
-								</Cell>
-							</InnerGrid>
+							<a
+								href={`/title/${title.imdbID}`}
+								on:click={() => selectedTitle.set(i)}
+								on:keydown={() => handleSelectTitleEnter}
+							>
+								<h4>{title.Title}</h4>
+							</a>
+							<p>{title.Year}</p>
+							<p>{capitaliseFirstLetter(title.Type)}</p>
 						</Cell>
 					</LayoutGrid>
 				</Paper>
 			</div>
 		{/each}
 	{:else}
-		<div>Search for a movie or show</div>
+		<div class="loading centred-horizontal">
+			<CircularProgress style="height: 100px; width: 100px" indeterminate />
+		</div>
 	{/if}
 </div>
 
@@ -88,7 +85,6 @@
 
 	img {
 		max-width: 150px;
-		/* max-height: 50%; */
 	}
 
 	p {

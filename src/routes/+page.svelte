@@ -7,5 +7,3 @@
 	import Fab from '@smui/fab/src/Fab.svelte';
 	import CircularProgress from '@smui/circular-progress';
 </script>
-
-<div>Search for a movie or show</div>
