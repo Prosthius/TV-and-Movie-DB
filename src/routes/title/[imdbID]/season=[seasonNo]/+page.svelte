@@ -140,15 +140,6 @@
 </div>
 
 <style>
-	.container {
-		padding: 24px;
-	}
-
-	.body {
-		max-width: 1000px;
-		margin: 0 auto;
-	}
-
 	.move {
 		transform: translate(0px, 0px);
 		display: inline-block;
@@ -160,10 +151,6 @@
 
 	* :global(.move-span) {
 		margin-left: 25px;
-	}
-
-	img {
-		max-width: 100%;
 	}
 
 	* :global(.smui-paper.smui-paper--color-secondary.smui-paper--raised.smui-paper--elevation-z1) {

@@ -42,10 +42,10 @@
 			<div class="container">
 				<Paper color="secondary">
 					<LayoutGrid>
-						<Cell spanDevices={{ desktop: 3, tablet: 3, phone: 2 }}>
+						<Cell spanDevices={{ desktop: 3, tablet: 3, phone: 4 }}>
 							<img src={title.Poster} alt="{title.Title} poster" />
 						</Cell>
-						<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 2 }}>
+						<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 4 }}>
 							<a
 								href={`/title/${title.imdbID}`}
 								on:click={() => selectedTitle.set(i)}
@@ -68,10 +68,6 @@
 </div>
 
 <style>
-	.container {
-		padding: 24px;
-	}
-
 	a h4 {
 		max-width: fit-content;
 		margin: 0;
@@ -89,11 +85,6 @@
 
 	p {
 		opacity: 80%;
-	}
-
-	.body {
-		max-width: 1000px;
-		margin: 0 auto;
 	}
 
 	* :global(.smui-paper.smui-paper--color-secondary.smui-paper--raised.smui-paper--elevation-z1) {
