@@ -27,6 +27,7 @@ export interface TitleDetails {
 	Loading: boolean;
 	Episode?: string;
 	Season: string;
+	BoxOffice?: string;
 }
 
 interface Rating {
