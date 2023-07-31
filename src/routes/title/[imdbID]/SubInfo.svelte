@@ -80,7 +80,7 @@
 			<Title>Top Cast</Title>
 			{$selectedTitleDetails.Actors}
 		</div>
-		<div class="divider"></div>
+		<div class="divider" />
 		<div class="paper-container">
 			{#if director.length > 1}
 				<Title>Directors</Title>
@@ -89,7 +89,7 @@
 			{/if}
 			{$selectedTitleDetails.Director}
 		</div>
-		<div class="divider"></div>
+		<div class="divider" />
 		<div class="paper-container">
 			{#if writer.length > 1}
 				<Title>Writers</Title>
@@ -105,13 +105,13 @@
 		<Paper>
 			<Title>Ratings</Title>
 			{#each $selectedTitleDetails.Ratings as rating}
-			<div class="subtitle">
-				{rating.Source}
-			</div>
+				<div class="subtitle">
+					{rating.Source}
+				</div>
 				<div class="indent">
 					{rating.Value}
 				</div>
-				<div class="divider"></div>
+				<div class="divider" />
 			{/each}
 		</Paper>
 	</div>
@@ -122,20 +122,20 @@
 			<Title>Language</Title>
 			{$selectedTitleDetails.Language}
 		</div>
-		<div class="divider"></div>
+		<div class="divider" />
 		<div class="paper-container">
 			<Title>Country</Title>
 			{$selectedTitleDetails.Country}
 		</div>
-		<div class="divider"></div>	
 		{#if $selectedTitleDetails.Awards !== 'N/A'}
+			<div class="divider" />
 			<div class="paper-container">
 				<Title>Awards</Title>
 				{$selectedTitleDetails.Awards}
 			</div>
 		{/if}
-		<div class="divider"></div>
 		{#if $selectedTitleDetails.BoxOffice}
+			<div class="divider" />
 			<div class="paper-container">
 				<Title>Box Office</Title>
 				{$selectedTitleDetails.BoxOffice}
