@@ -23,6 +23,8 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
         let apiUrl: string = `${host}&i=${query.imdbID}&plot=${query.plotLength}`;
         let res: Response = await fetch(apiUrl);
         let json: TitleDetails | Error = await res.json();
+        if ((json as TitleDetails).Response === 'False')
+                return new Response(`{"Response": "${json.Response}","Error": "${json.Error}"}`, { status: 400 });
         return new Response(JSON.stringify(json));
     } catch (error: unknown) {
         return new Response(`{"Error": "${error}"}`, { status: 500 });

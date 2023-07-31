@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { selectedTitleDetails, error } from '$lib/stores';
+	import { selectedTitleDetails } from '$lib/stores';
 	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
 	import CircularProgress from '@smui/circular-progress';
 	import Select, { Option } from '@smui/select';
-	import Paper, { Title, Subtitle } from '@smui/paper';
+	import Paper, { Title } from '@smui/paper';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
 	import Fab from '@smui/fab';
 	import { goto } from '$app/navigation';
@@ -14,54 +14,64 @@
 	import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
 
 	let episodes: TitleDetails[] = [];
-	let promise: Promise<void> = new Promise(() => {});
+	let promise: Promise<[void, void]> = new Promise(() => {});
 	let loadEpisodesPromise: Promise<void>;
 	let totalSeasons: string[] = [];
 	let selectedSeason: string;
 	$: currentImdbID = $page.params.imdbID;
 
 	onMount(async (): Promise<void> => {
-		selectedSeason = $page.params.seasonNo;
-		promise = new Promise(async (resolve, reject) => {
-			getShowDetails(currentImdbID);
-			await getSeason(currentImdbID, parseInt(selectedSeason));
-			resolve();
-		});
+		try {
+			selectedSeason = $page.params.seasonNo;
+			promise = Promise.all([
+				getShowDetails(currentImdbID),
+				getSeason(currentImdbID, parseInt(selectedSeason))
+			]);
+			await promise;
+		} catch (error: unknown) {
+			console.log(error);
+		}
 	});
 
 	async function getShowDetails(imdbID: string): Promise<void> {
-		error.errorFalse();
 		try {
 			let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=short`);
 			let json: TitleDetails = await res.json();
 			selectedTitleDetails.set(json);
+			if ($selectedTitleDetails.Response === 'False') throw new Error($selectedTitleDetails.Error);
 			for (let i: number = 0; i < parseInt($selectedTitleDetails.totalSeasons as string); i++) {
 				totalSeasons.push((i + 1).toString());
 			}
-		} catch (errorStr: unknown) {
-			console.log(errorStr);
-			error.errorTrue();
+		} catch (error: unknown) {
+			console.log(error);
+			throw error;
 		}
 	}
 
 	async function getSeason(imdbID: string, seasonNum: number): Promise<void> {
-		error.errorFalse();
 		try {
 			let res: Response = await fetch(`/api/season?imdbID=${imdbID}&season=${seasonNum}`);
-			let json: TitleDetails[] = await res.json();
-			episodes = json;
-		} catch (errorStr: unknown) {
-			console.log(errorStr);
-			error.errorTrue();
+			let json: TitleDetails[] | TitleDetails = await res.json();
+			if ((json as TitleDetails).Response === 'False')
+				throw new Error((json as TitleDetails).Error);
+			episodes = json as TitleDetails[];
+		} catch (error: unknown) {
+			console.log(error);
+			throw error;
 		}
 	}
 
-	function changeSeason() {
-		if (selectedSeason !== $page.params.seasonNo) {
-			goto(`/title/${currentImdbID}/season=${selectedSeason}`);
+	function changeSeason(season: string) {
+		if (season !== $page.params.seasonNo) {
+			goto(`/title/${currentImdbID}/season=${season}`);
 			loadEpisodesPromise = new Promise(async (resolve, reject) => {
-				await getSeason(currentImdbID, parseInt(selectedSeason));
-				resolve();
+				try {
+					await getSeason(currentImdbID, parseInt(season));
+					resolve();
+				} catch (error: unknown) {
+					reject(error);
+					console.log(error);
+				}
 			});
 		}
 	}
@@ -87,7 +97,7 @@
 					</Cell>
 					<Cell spanDevices={{ desktop: 6, tablet: 4, phone: 4 }}>
 						<div style="margin: 0;">
-							<Select bind:value={selectedSeason} on:click={changeSeason}>
+							<Select bind:value={selectedSeason} on:click={() => changeSeason(selectedSeason)}>
 								{#each totalSeasons as seasonNum}
 									<Option value={seasonNum}>Season {seasonNum}</Option>
 								{/each}
@@ -136,6 +146,10 @@
 				</div>
 			{/each}
 		{/await}
+	{:catch error}
+		<div class="container error centre">
+			{error}
+		</div>
 	{/await}
 </div>
 

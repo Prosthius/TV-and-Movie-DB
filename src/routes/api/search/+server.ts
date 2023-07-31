@@ -15,6 +15,8 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
         let apiUrl: string = `${host}&s=${query}`;
         let res: Response = await fetch(apiUrl);
         let json: SearchResults | Error = await res.json();
+        if ((json as Error).Response === 'False')
+            return new Response(`{"Response": "${json.Response}","Error": "${(json as Error).Error}"}`, { status: 400 });
         return new Response(JSON.stringify(json));
     } catch (error: unknown) {
         return new Response(`{"Error": "${error}"}`, { status: 500 });

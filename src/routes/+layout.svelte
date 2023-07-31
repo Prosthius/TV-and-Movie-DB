@@ -1,11 +1,10 @@
 <script lang="ts">
 	import '../app.scss';
-	import { onMount, setContext } from 'svelte';
+	import { onMount, onDestroy, setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import type { SearchResults } from '$lib/interfaces/SearchResults';
 	import type { Error } from '$lib/interfaces/Error';
-	import { searchResults, error } from '$lib/stores';
-	import { page } from '$app/stores';
+	import { searchResults, hasRun, searchTitlePromise } from '$lib/stores';
 	import { Icon } from '@smui/common';
 	import { Input } from '@smui/textfield';
 	import Paper from '@smui/paper';
@@ -16,9 +15,10 @@
 	import TopAppBar, { Row, Section } from '@smui/top-app-bar';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
 
-	let lightTheme: boolean;
+	let lightTheme: Boolean;
 	let searchTitleInput: string;
 	let noSearchQuery: Boolean;
+	let promise: Promise<void>;
 
 	setContext('searchTitle', searchTitle);
 
@@ -26,13 +26,28 @@
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
 
+	onDestroy((): void => {
+		hasRun.set(false);
+	});
+
+	async function handleSearch(): Promise<void> {
+		try {
+			promise = searchTitle(searchTitleInput);
+			searchTitlePromise.set(promise);
+			await promise;
+			searchTitlePromise.set(promise);
+		} catch (error: unknown) {
+			searchTitlePromise.set(promise);
+		}
+	}
+
 	function handleSearchEnterPress(event: KeyboardEvent | CustomEvent): void {
-		event = event as KeyboardEvent;
-		event.key === 'Enter' ? searchTitle(searchTitleInput) : null;
+		if ((event as KeyboardEvent).key === 'Enter') handleSearch();
 	}
 
 	async function searchTitle(query: string): Promise<void> {
 		try {
+			hasRun.set(true);
 			searchResults.loadingTrue();
 			if (query) {
 				noSearchQuery = false;
@@ -41,19 +56,16 @@
 				noSearchQuery = true;
 				throw new Error('No query');
 			}
-			error.errorFalse();
 			searchTitleInput = '';
 			let res: Response = await fetch(`/api/search?query=${query}`);
 			let json: SearchResults | Error = await res.json();
-			if (json.Response === 'True') {
-				searchResults.setData(json as SearchResults);
-			} else {
-				error.setData(json as Error);
-				error.errorTrue();
-			}
-		} catch (errorStr) {
-			console.log(errorStr);
-			error.set({ Error: errorStr, Response: 'False', Status: true } as Error);
+			if (json.Response === 'False') throw new Error((json as Error).Error);
+			searchResults.setData(json as SearchResults);
+			searchResults.loadingFalse();
+		} catch (error: any) {
+			searchResults.loadingFalse();
+			console.log(error);
+			throw error;
 		}
 	}
 </script>
@@ -115,7 +127,7 @@
 					class="input"
 				/>
 			</Paper>
-			<Fab on:click={() => searchTitle($page.params.query)} color="primary" mini class="fab">
+			<Fab on:click={handleSearch} color="primary" mini class="fab">
 				<Icon class="material-icons">arrow_forward</Icon>
 			</Fab>
 		</Cell>

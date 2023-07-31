@@ -1,43 +1,47 @@
 <script lang="ts">
 	import { onMount, onDestroy, getContext } from 'svelte';
-	import { searchResults, error, selectedTitle } from '$lib/stores';
+	import { searchResults, selectedTitle, hasRun, searchTitlePromise } from '$lib/stores';
+	import { capitaliseFirstLetter } from '$lib/helper';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
-	import { Icon } from '@smui/common';
-	import { Input } from '@smui/textfield';
 	import Paper from '@smui/paper';
 	import LayoutGrid from '@smui/layout-grid/src/LayoutGrid.svelte';
 	import Cell from '@smui/layout-grid/src/Cell.svelte';
-	import Fab from '@smui/fab/src/Fab.svelte';
 	import CircularProgress from '@smui/circular-progress';
-	import InnerGrid from '@smui/layout-grid/src/InnerGrid.svelte';
+
+	let promise: Promise<void> = new Promise(() => {});
 
 	const searchTitle: (query: string) => Promise<void> = getContext('searchTitle');
 
-	onMount(() => {
-		$searchResults.Loading ? null : searchTitle($page.params.query);
+	onMount(async (): Promise<void> => {
+		if (!$hasRun) {
+			try {
+				promise = searchTitle($page.params.query);
+				searchTitlePromise.set(promise);
+				await promise;
+				searchTitlePromise.set(promise);
+			} catch (error: unknown) {
+				console.log(error);
+				searchTitlePromise.set(promise);
+			}
+		}
+	});
+
+	onDestroy((): void => {
+		hasRun.set(false);
 	});
 
 	function handleSelectTitleEnter(event: KeyboardEvent): void {
 		const value: number = parseInt((event.target as HTMLInputElement).value);
 		event.key === 'Enter' ? selectedTitle.set(value) : null;
 	}
-
-	function capitaliseFirstLetter(str: string): string {
-		return str.charAt(0).toUpperCase() + str.slice(1);
-	}
 </script>
 
 <div class="body">
-	{#if $error.Status}
-		<div>
-			{$error.Error}
-		</div>
-	{:else if $searchResults.Loading}
+	{#await $searchTitlePromise || promise}
 		<div class="loading centred-horizontal">
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
-	{:else if $searchResults.Response === 'True'}
+	{:then}
 		{#each $searchResults.Search as title, i}
 			<div class="container">
 				<Paper color="secondary">
@@ -46,44 +50,44 @@
 							<img src={title.Poster} alt="{title.Title} poster" />
 						</Cell>
 						<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 4 }}>
-							<a
-								href={`/title/${title.imdbID}`}
-								on:click={() => selectedTitle.set(i)}
-								on:keydown={() => handleSelectTitleEnter}
-							>
-								<h4>{title.Title}</h4>
-							</a>
-							<p>{title.Year}</p>
-							<p>{capitaliseFirstLetter(title.Type)}</p>
+							<div class="title">
+								<a
+									href={`/title/${title.imdbID}`}
+									on:click={() => selectedTitle.set(i)}
+									on:keydown={() => handleSelectTitleEnter}
+									>{title.Title}
+								</a>
+							</div>
+							<div class="sub-text">
+								{title.Year}
+							</div>
+							<div class="sub-text">
+								{capitaliseFirstLetter(title.Type)}
+							</div>
 						</Cell>
 					</LayoutGrid>
 				</Paper>
 			</div>
 		{/each}
-	{:else}
-		<div class="loading centred-horizontal">
-			<CircularProgress style="height: 100px; width: 100px" indeterminate />
+	{:catch error}
+		<div class="container error centre">
+			{error}
 		</div>
-	{/if}
+	{/await}
 </div>
 
 <style>
-	a h4 {
-		max-width: fit-content;
-		margin: 0;
-		font-size: 2.5rem;
-		text-decoration: underline;
-	}
-
-	a {
-		text-decoration: none;
+	.title {
+		font-size: 3rem;
+		line-height: 1;
+		margin: 0px 0px 10px 0px;
 	}
 
 	img {
 		max-width: 150px;
 	}
 
-	p {
+	.sub-text {
 		opacity: 80%;
 	}
 

@@ -2,7 +2,7 @@
 	import MainInfo from './MainInfo.svelte';
 	import SubInfo from './SubInfo.svelte';
 	import { onMount } from 'svelte';
-	import { selectedTitleDetails, error } from '$lib/stores';
+	import { selectedTitleDetails } from '$lib/stores';
 	import { page } from '$app/stores';
 	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
 	import type { Error, StreamingError } from '$lib/interfaces/Error';
@@ -11,13 +11,19 @@
 
 	let streamingAvailability: StreamingAvailability;
 	let streamingError: StreamingError;
-	let promise: Promise<void> = new Promise(() => {});
+	let promise: Promise<[void, void]> = new Promise(() => {});
 	let type: string;
 
-	onMount((): void => {
-		promise = new Promise(async (resolve, reject) => {
+	onMount(async (): Promise<void> => {
+		try {
 			selectedTitleDetails.reset();
-			await Promise.all([getAvailability($page.params.imdbID), getInfo($page.params.imdbID)]);
+			promise = Promise.all([
+				await getInfo($page.params.imdbID),
+				$selectedTitleDetails.Type === 'episode'
+					? getStreamAvail($selectedTitleDetails.seriesID as string)
+					: getStreamAvail($page.params.imdbID),
+			]);
+			await promise;
 			switch ($selectedTitleDetails.Type) {
 				case 'series':
 					type = 'TV Series';
@@ -32,37 +38,37 @@
 					type = $selectedTitleDetails.Type;
 					break;
 			}
-			resolve();
-		});
+		} catch (error: unknown) {
+			console.log(error);
+		}
 	});
 
 	async function getInfo(imdbID: string): Promise<void> {
 		selectedTitleDetails.loadingTrue();
-		error.errorFalse();
 		try {
 			let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=full`);
 			let json: TitleDetails | Error = await res.json();
 			if (json.Response === 'True') {
 				selectedTitleDetails.setData(json as TitleDetails);
 			} else {
-				error.setData(json as Error);
-				error.errorTrue();
+				throw new Error((json as Error).Error);
 			}
-		} catch (errorStr: unknown) {
-			console.log(errorStr);
-			error.set({ Error: errorStr, Response: 'False', Status: true } as Error);
+		} catch (error: unknown) {
+			console.log(error);
+			throw error;
 		}
 	}
 
-	async function getAvailability(imdbID: string): Promise<void> {
+	async function getStreamAvail(imdbID: string): Promise<void> {
 		try {
 			const res: Response = await fetch(`/api/streaming?imdbID=${imdbID}`);
 			const json: StreamingAvailability | StreamingError = await res.json();
 			IsStreamingAvailability(json)
 				? (streamingAvailability = json as StreamingAvailability)
 				: (streamingError = json as StreamingError);
-		} catch (errorStr: unknown) {
-			console.error(errorStr);
+		} catch (error: unknown) {
+			console.error(error);
+			throw error;
 		}
 	}
 
@@ -79,14 +85,10 @@
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
 	{:then}
-		{#if $error.Status}
-			<div>
-				{$error.Error}
-			</div>
-		{:else}
-			<MainInfo {type} />
-			<SubInfo {streamingAvailability} />
-		{/if}
+		<MainInfo {type} />
+		<SubInfo {streamingAvailability} />
+	{:catch error}
+		<div class="container error centre">{error}</div>
 	{/await}
 </div>
 

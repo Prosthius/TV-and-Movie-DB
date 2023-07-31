@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { selectedTitleDetails, error } from '$lib/stores';
+	import { selectedTitleDetails } from '$lib/stores';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
 	import Fab, { Icon } from '@smui/fab';
 	import Paper from '@smui/paper';
 	import LayoutGrid, { Cell, InnerGrid } from '@smui/layout-grid';
@@ -13,13 +12,17 @@
 </script>
 
 <div class="container fab-container">
-	<Fab color="secondary" mini href="">
-		<Icon class="material-icons left-arrow">arrow_backward</Icon>
-	</Fab>
-	<div class="fab">
-		{#if type === 'TV Series'}
-			<Fab href={`/title/${($page.params.imdbID)}/season=1`} color="primary" extended>All Episodes</Fab>
-		{:else if type === 'Episode'}
+	{#if type === 'TV Series'}
+		<div class="fab">
+			<Fab href={`/title/${$page.params.imdbID}/season=1`} color="primary" extended>
+				All Episodes
+			</Fab>
+		</div>
+	{:else if type === 'Episode'}
+		<Fab color="secondary" mini href="">
+			<Icon class="material-icons left-arrow">arrow_backward</Icon>
+		</Fab>
+		<div class="fab">
 			<Fab
 				href={`/title/${encodeURIComponent(String($selectedTitleDetails.seriesID))}/season=${
 					$selectedTitleDetails.Season
@@ -29,11 +32,11 @@
 			>
 				All Episodes
 			</Fab>
-		{/if}
-	</div>
-	<Fab color="secondary" mini href="">
-		<Icon class="material-icons right-arrow">arrow_forward</Icon>
-	</Fab>
+		</div>
+		<Fab color="secondary" mini href="">
+			<Icon class="material-icons right-arrow">arrow_forward</Icon>
+		</Fab>
+	{/if}
 </div>
 <div class="container">
 	<Paper color="secondary">
@@ -91,10 +94,6 @@
 	* :global(.left-arrow) {
 		transform: translateX(48px);
 	}
-
-	/* * :global(.right-arrow) {
-		transform: translateX(9px);
-	} */
 
 	.container.fab-container {
 		display: flex;

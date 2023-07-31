@@ -4,6 +4,7 @@ export interface Season {
     totalSeasons: string;
     Episodes: Episode[];
     Response: string;
+    Error?: string
 }
 
 interface Episode {
@@ -12,4 +13,5 @@ interface Episode {
     Episode: string;
     imdbRating: string;
     imdbID: string;
+    Error?: string
 }

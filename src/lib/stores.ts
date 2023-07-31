@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import type { SearchResultsWritable, SearchResults } from '$lib/interfaces/SearchResults';
-import type { Error, ErrorWritable } from '$lib/interfaces/Error';
+import type { Error } from '$lib/interfaces/Error';
 import type { TitleDetails, TitleDetailsWritable } from '$lib/interfaces/TitleDetails';
 
 // TODO - move each variable to separate files
@@ -70,29 +70,6 @@ function createSearchResults(): SearchResultsWritable {
     };
 }
 
-export const error: ErrorWritable = createError();
-function createError(): ErrorWritable {
-    const { subscribe, set, update }: Writable<Error> = writable<Error>({
-        Error: '',
-        Response: 'False',
-        Status: false
-    });
-    return {
-        subscribe,
-        set,
-        update,
-        errorTrue: (): void => update(state => ({ ...state, Status: true })),
-        errorFalse: (): void => update(state => ({ ...state, Status: false })),
-        setData: (json: Error): void => {
-            update((storeValue: Error): Error => {
-                storeValue = { ...storeValue, ...json };
-                storeValue.Status = true;
-                return storeValue;
-            });
-        }
-    };
-}
-
 export const selectedTitleDetails: TitleDetailsWritable = createSelectedTitleDetails();
 function createSelectedTitleDetails(): TitleDetailsWritable {
     const { subscribe, set, update }: Writable<TitleDetails> = writable<TitleDetails>(selectedTitleDetailsDefault);
@@ -114,3 +91,7 @@ function createSelectedTitleDetails(): TitleDetailsWritable {
 }
 
 export const selectedTitle: Writable<number> = writable<number>(0);
+
+export const hasRun: Writable<Boolean> = writable<Boolean>(false);
+
+export const searchTitlePromise: Writable<Promise<void> | null> = writable<null>(null);

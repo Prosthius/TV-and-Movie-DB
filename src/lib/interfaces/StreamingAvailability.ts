@@ -38,22 +38,26 @@ interface StreamingService {
     addOn: string;
     link: string;
     watchLink: string;
-    audios: {
-        language: string;
-        region?: string;
-    }[];
-    subtitles: {
-        locale: {
-            language: string;
-            region?: string;
-        };
-        closedCaptions: boolean;
-    }[];
-    price?: any | {
+    audios: Audios[];
+    subtitles: Subtitles[];
+    price?: null | {
         amount: string;
         currency: string;
         formatted: string;
     };
     leaving: number;
     availableSince: number;
+}
+
+interface Audios {
+    language: string;
+    region: string;
+}
+
+interface Subtitles {
+    locale: {
+        language: string;
+        region: string;
+    };
+    closedCaptions: boolean;
 }
