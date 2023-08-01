@@ -24,7 +24,7 @@
 			</Fab>
 		</div>
 	{:else if type === 'Episode'}
-		<Fab color="secondary" mini href={`/title/${prevEpID}`}>
+		<Fab color="secondary" mini href={`/title/${prevEpID}`} data-sveltekit-reload>
 			<Icon class="material-icons left-arrow">arrow_backward</Icon>
 		</Fab>
 		<div class="fab">

@@ -11,7 +11,8 @@
 
 	let streamingAvailability: StreamingAvailability;
 	let streamingError: StreamingError;
-	let promise: Promise<[void, void]> = new Promise(() => {});
+	let epPromise: Promise<[void, void]> = new Promise(() => {});
+	let promise: Promise<void>;
 	let episodes: TitleDetails[] = [];
 	let nextEpID: string;
 	let prevEpID: string;
@@ -25,16 +26,19 @@
 			selectedTitleDetails.reset();
 			await getInfo($page.params.imdbID);
 			if ($selectedTitleDetails.Type === 'episode') {
-				promise = Promise.all([
+				epPromise = Promise.all([
 					getStreamAvail($selectedTitleDetails.seriesID as string),
 					getSeason(seriesID as string, parseInt(season as string))
 				]);
+				await epPromise;
 			} else {
-				await getStreamAvail($page.params.imdbID);
+				promise = getStreamAvail($page.params.imdbID);
+				await promise;
 			}
-			await promise;
-			getNextEp();
-			getPrevEp();
+			if (type === 'episode') {
+				getNextEp();
+				getPrevEp();
+			}
 			switch ($selectedTitleDetails.Type) {
 				case 'series':
 					type = 'TV Series';
@@ -113,7 +117,7 @@
 
 	function getPrevEp(): void {
 		try {
-			let prevEpIndex: number = 0;
+			let prevEpIndex: number = 1;
 			episodes.forEach((episode, i) => {
 				imdbID === episode.imdbID ? (prevEpIndex = i - 1) : null;
 			});
@@ -125,7 +129,7 @@
 </script>
 
 <div class="body">
-	{#await promise}
+	{#await promise || epPromise}
 		<div class="loading centred-horizontal">
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
