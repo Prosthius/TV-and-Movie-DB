@@ -40,34 +40,33 @@
 		<Title>Streaming Services</Title>
 		{#if streamingAvailability?.result.streamingInfo.au}
 			{#each Object.keys(streamingAvailability.result.streamingInfo.au) as service}
-				<div class="divider">
-					<div class="subtitle">
-						{capitaliseFirstLetter(service)}
-					</div>
-					{#each streamingAvailability.result.streamingInfo.au[service] as streamingService}
-						<div class="indent">
-							<div>
-								<a target="_blank" href={streamingService.link}>
-									{capitaliseFirstLetter(streamingService.type)}
-								</a>
-							</div>
-							{#if streamingService.price}
-								<div>
-									${streamingService.price.amount}
-									{streamingService.price.currency}
-								</div>
-							{/if}
-							<div>
-								{streamingService.quality.toLocaleUpperCase()}
-							</div>
-							{#if streamingService.leaving !== 0}
-								<div>
-									Leaving on {unixSecToTime(streamingService.leaving)}
-								</div>
-							{/if}
-						</div>
-					{/each}
+				<div class="subtitle">
+					{capitaliseFirstLetter(service)}
 				</div>
+				{#each streamingAvailability.result.streamingInfo.au[service] as streamingService}
+					<div class="indent">
+						<div>
+							<a target="_blank" href={streamingService.link}>
+								{capitaliseFirstLetter(streamingService.type)}
+							</a>
+						</div>
+						{#if streamingService.price}
+							<div>
+								${streamingService.price.amount}
+								{streamingService.price.currency}
+							</div>
+						{/if}
+						<div>
+							{streamingService.quality.toLocaleUpperCase()}
+						</div>
+						{#if streamingService.leaving !== 0}
+							<div>
+								Leaving on {unixSecToTime(streamingService.leaving)}
+							</div>
+						{/if}
+					</div>
+				{/each}
+				<div class="divider rating" />
 			{/each}
 		{:else}
 			<div>Streaming service information currently unavailable</div>
@@ -167,6 +166,14 @@
 		margin-bottom: auto;
 		padding-bottom: 0px;
 		box-shadow: none;
+	}
+
+	.divider.rating {
+		margin-top: 14px;
+	}
+
+	.divider.rating:last-child {
+		margin-top: auto;
 	}
 
 	.indent {

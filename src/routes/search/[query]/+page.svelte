@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy, getContext } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { searchResults, selectedTitle, hasRun, searchTitlePromise } from '$lib/stores';
 	import { capitaliseFirstLetter } from '$lib/helper';
 	import { page } from '$app/stores';
@@ -7,10 +7,11 @@
 	import LayoutGrid from '@smui/layout-grid/src/LayoutGrid.svelte';
 	import Cell from '@smui/layout-grid/src/Cell.svelte';
 	import CircularProgress from '@smui/circular-progress';
+	import type { SearchResults } from '$lib/interfaces/SearchResults';
+	import type { Error } from '$lib/interfaces/Error';
 
 	let promise: Promise<void> = new Promise(() => {});
-
-	const searchTitle: (query: string) => Promise<void> = getContext('searchTitle');
+	let searchTitleInput: string;
 
 	onMount(async (): Promise<void> => {
 		if (!$hasRun) {
@@ -29,6 +30,24 @@
 	onDestroy((): void => {
 		hasRun.set(false);
 	});
+
+	async function searchTitle(query: string): Promise<void> {
+		try {
+			searchResults.loadingTrue();
+			hasRun.set(true);
+			if (!query) throw new Error('No query');
+			searchTitleInput = '';
+			let res: Response = await fetch(`/api/search?query=${query}`);
+			let json: SearchResults | Error = await res.json();
+			if (json.Response === 'False') throw new Error((json as Error).Error);
+			searchResults.setData(json as SearchResults);
+			searchResults.loadingFalse();
+		} catch (error: any) {
+			searchResults.loadingFalse();
+			console.log(error);
+			throw error;
+		}
+	}
 
 	function handleSelectTitleEnter(event: KeyboardEvent): void {
 		const value: number = parseInt((event.target as HTMLInputElement).value);

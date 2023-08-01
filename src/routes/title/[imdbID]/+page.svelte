@@ -12,18 +12,29 @@
 	let streamingAvailability: StreamingAvailability;
 	let streamingError: StreamingError;
 	let promise: Promise<[void, void]> = new Promise(() => {});
-	let type: string;
+	let episodes: TitleDetails[] = [];
+	let nextEpID: string;
+	let prevEpID: string;
+	$: type = $selectedTitleDetails.Type;
+	$: seriesID = $selectedTitleDetails.seriesID;
+	$: season = $selectedTitleDetails.Season;
+	$: imdbID = $selectedTitleDetails.imdbID;
 
 	onMount(async (): Promise<void> => {
 		try {
 			selectedTitleDetails.reset();
-			promise = Promise.all([
-				await getInfo($page.params.imdbID),
-				$selectedTitleDetails.Type === 'episode'
-					? getStreamAvail($selectedTitleDetails.seriesID as string)
-					: getStreamAvail($page.params.imdbID),
-			]);
+			await getInfo($page.params.imdbID);
+			if ($selectedTitleDetails.Type === 'episode') {
+				promise = Promise.all([
+					getStreamAvail($selectedTitleDetails.seriesID as string),
+					getSeason(seriesID as string, parseInt(season as string))
+				]);
+			} else {
+				await getStreamAvail($page.params.imdbID);
+			}
 			await promise;
+			getNextEp();
+			getPrevEp();
 			switch ($selectedTitleDetails.Type) {
 				case 'series':
 					type = 'TV Series';
@@ -48,11 +59,8 @@
 		try {
 			let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=full`);
 			let json: TitleDetails | Error = await res.json();
-			if (json.Response === 'True') {
-				selectedTitleDetails.setData(json as TitleDetails);
-			} else {
-				throw new Error((json as Error).Error);
-			}
+			if (json.Response === 'False') throw new Error((json as Error).Error);
+			selectedTitleDetails.setData(json as TitleDetails);
 		} catch (error: unknown) {
 			console.log(error);
 			throw error;
@@ -77,6 +85,43 @@
 	): json is StreamingAvailability {
 		return (json as StreamingAvailability).result !== undefined;
 	}
+
+	async function getSeason(imdbID: string, seasonNum: number): Promise<void> {
+		try {
+			let res: Response = await fetch(`/api/season?imdbID=${imdbID}&season=${seasonNum}`);
+			let json: TitleDetails[] | TitleDetails = await res.json();
+			if ((json as TitleDetails).Response === 'False')
+				throw new Error((json as TitleDetails).Error);
+			episodes = json as TitleDetails[];
+		} catch (error: unknown) {
+			console.log(error);
+			throw error;
+		}
+	}
+
+	function getNextEp(): void {
+		try {
+			let nextEpIndex: number = 0;
+			episodes.forEach((episode, i) => {
+				imdbID === episode.imdbID ? (nextEpIndex = i + 1) : null;
+			});
+			nextEpID = episodes[nextEpIndex].imdbID;
+		} catch (error: unknown) {
+			console.log(error);
+		}
+	}
+
+	function getPrevEp(): void {
+		try {
+			let prevEpIndex: number = 0;
+			episodes.forEach((episode, i) => {
+				imdbID === episode.imdbID ? (prevEpIndex = i - 1) : null;
+			});
+			prevEpID = episodes[prevEpIndex].imdbID;
+		} catch (error: unknown) {
+			console.log(error);
+		}
+	}
 </script>
 
 <div class="body">
@@ -85,7 +130,7 @@
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
 	{:then}
-		<MainInfo {type} />
+		<MainInfo {type} {nextEpID} {prevEpID} />
 		<SubInfo {streamingAvailability} />
 	{:catch error}
 		<div class="container error centre">{error}</div>

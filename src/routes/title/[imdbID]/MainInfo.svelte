@@ -8,7 +8,12 @@
 	import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
 
 	export let type: string;
+	export let nextEpID: string;
+	export let prevEpID: string;
 	$: title = $selectedTitleDetails;
+	$: seriesID = title.seriesID;
+	$: season = title.Season;
+	$: episode = title.Episode;
 </script>
 
 <div class="container fab-container">
@@ -19,21 +24,19 @@
 			</Fab>
 		</div>
 	{:else if type === 'Episode'}
-		<Fab color="secondary" mini href="">
+		<Fab color="secondary" mini href={`/title/${prevEpID}`}>
 			<Icon class="material-icons left-arrow">arrow_backward</Icon>
 		</Fab>
 		<div class="fab">
 			<Fab
-				href={`/title/${encodeURIComponent(String($selectedTitleDetails.seriesID))}/season=${
-					$selectedTitleDetails.Season
-				}`}
+				href={`/title/${seriesID}/season=${season}`}
 				color="primary"
 				extended
 			>
 				All Episodes
 			</Fab>
 		</div>
-		<Fab color="secondary" mini href="">
+		<Fab color="secondary" mini href={nextEpID} data-sveltekit-reload>
 			<Icon class="material-icons right-arrow">arrow_forward</Icon>
 		</Fab>
 	{/if}

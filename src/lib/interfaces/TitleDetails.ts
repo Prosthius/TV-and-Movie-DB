@@ -27,7 +27,7 @@ export interface TitleDetails {
 	Error?: string;
 	Loading: boolean;
 	Episode?: string;
-	Season: string;
+	Season?: string;
 	BoxOffice?: string;
 }
 
