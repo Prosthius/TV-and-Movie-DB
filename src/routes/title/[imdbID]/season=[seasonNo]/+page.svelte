@@ -124,7 +124,7 @@
 							<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }}>
 								<InnerGrid>
 									<Cell spanDevices={{ desktop: 9, tablet: 6, phone: 3 }}>
-										<a href={`/title/${ep.imdbID}`}>
+										<a href={`/title/${ep.imdbID}`} data-sveltekit-preload-data="off">
 											<Title>{ep.Season}.{ep.Episode}<br />{ep.Title}</Title>
 										</a>
 										<div style="opacity: 70%;">

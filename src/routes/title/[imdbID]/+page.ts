@@ -1,0 +1,130 @@
+import type { PageLoad } from './$types';
+import type { TitleDetails } from '$lib/interfaces/TitleDetails';
+import type { OmdbError, StreamingError } from '$lib/interfaces/Error';
+import type { StreamingAvailability } from '$lib/interfaces/StreamingAvailability';
+import { error } from '@sveltejs/kit';
+
+export const load = (async ({ fetch, params }) => {
+    let streaming: StreamingAvailability | undefined;
+    let streamingError: StreamingError | undefined;
+    let episodes: TitleDetails[] = [];
+    let titleDetails: TitleDetails;
+    let streamingJSON: StreamingAvailability | StreamingError;
+
+    titleDetails = await getInfo(fetch, params.imdbID);
+    if (titleDetails.Type === 'episode') {
+        episodes = await getSeason(
+            fetch,
+            titleDetails.seriesID as string,
+            parseInt(titleDetails.Season as string)
+        );
+        // getNextEp(episodes, titleDetails.imdbID);
+        // getPrevEp(episodes, titleDetails.imdbID);
+    }
+
+    streamingJSON = await getStreamAvail(fetch, params.imdbID);
+
+    IsStreamingAvailability(streamingJSON) ?
+        streaming = streamingJSON :
+        streamingError = streamingJSON
+
+    switch (titleDetails.Type) {
+        case 'series':
+            titleDetails.Type = 'TV Series';
+            break;
+        case 'movie':
+            titleDetails.Type = 'Movie';
+            break;
+        case 'episode':
+            titleDetails.Type = 'Episode';
+            break;
+        default:
+            titleDetails.Type = titleDetails.Type;
+            break;
+    }
+
+    return {
+        titleDetails,
+        streaming,
+        streamingError
+    };
+}) satisfies PageLoad;
+
+async function getInfo(
+    fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>,
+    imdbID: string
+): Promise<TitleDetails> {
+    try {
+        let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=full`);
+        if (!res.ok) throw error(404, 'Not Found');
+        let json: TitleDetails | OmdbError = await res.json();
+        if (json.Response === 'False') throw new Error((json as OmdbError).Error);
+        return json as TitleDetails;
+    } catch (error: unknown) {
+        console.log(error);
+        throw error;
+    }
+}
+
+async function getStreamAvail(
+    fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>,
+    imdbID: string
+): Promise<StreamingAvailability | StreamingError> {
+    try {
+        const res: Response = await fetch(`/api/streaming?imdbID=${imdbID}`);
+        const json: StreamingAvailability = await res.json();
+        return json;
+    } catch (error: unknown) {
+        console.error(error);
+        throw error;
+    }
+}
+
+function IsStreamingAvailability(
+    json: StreamingAvailability | StreamingError
+): json is StreamingAvailability {
+    return (json as StreamingAvailability).result !== undefined;
+}
+
+async function getSeason(
+    fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>,
+    imdbID: string,
+    seasonNum: number
+): Promise<TitleDetails[]> {
+    try {
+        let res: Response = await fetch(`/api/season?imdbID=${imdbID}&season=${seasonNum}`);
+        let json: TitleDetails[] | TitleDetails = await res.json();
+        if ((json as TitleDetails).Response === 'False')
+            throw new Error((json as TitleDetails).Error);
+        return json as TitleDetails[];
+    } catch (error: unknown) {
+        console.log(error);
+        throw error;
+    }
+}
+
+function getNextEp(episodes: TitleDetails[], imdbID: string): string {
+    try {
+        let nextEpIndex: number = 0;
+        episodes.forEach((episode, i) => {
+            imdbID === episode.imdbID ? (nextEpIndex = i + 1) : null;
+        });
+        return episodes[nextEpIndex].imdbID;
+    } catch (error: unknown) {
+        console.log(error);
+        throw error;
+    }
+}
+
+function getPrevEp(episodes: TitleDetails[], imdbID: string): string {
+    try {
+        let prevEpIndex: number = 1;
+        episodes.forEach((episode, i) => {
+            imdbID === episode.imdbID ? (prevEpIndex = i - 1) : null;
+        });
+        return episodes[prevEpIndex].imdbID;
+    } catch (error: unknown) {
+        console.log(error);
+        throw error;
+    }
+}

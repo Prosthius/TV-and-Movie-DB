@@ -1,42 +1,43 @@
 <script lang="ts">
-	import { selectedTitleDetails } from '$lib/stores';
 	import { page } from '$app/stores';
 	import Fab, { Icon } from '@smui/fab';
 	import Paper from '@smui/paper';
 	import LayoutGrid, { Cell, InnerGrid } from '@smui/layout-grid';
 	import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
 	import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
+	import type { PageData } from './$types';
 
-	export let type: string;
 	export let nextEpID: string;
 	export let prevEpID: string;
-	$: title = $selectedTitleDetails;
-	$: seriesID = title.seriesID;
-	$: season = title.Season;
-	$: episode = title.Episode;
+	export let data: PageData;
 </script>
 
 <div class="container fab-container">
-	{#if type === 'TV Series'}
+	{#if data.titleDetails.Type === 'TV Series'}
 		<div class="fab">
-			<Fab href={`/title/${$page.params.imdbID}/season=1`} color="primary" extended>
+			<Fab
+				href={`/title/${$page.params.imdbID}/season=1`}
+				color="primary"
+				extended
+				data-sveltekit-preload-data="off"
+			>
 				All Episodes
 			</Fab>
 		</div>
-	{:else if type === 'Episode'}
+	{:else if data.titleDetails.Type === 'Episode'}
 		<Fab color="secondary" mini href={`/title/${prevEpID}`} data-sveltekit-reload>
 			<Icon class="material-icons left-arrow">arrow_backward</Icon>
 		</Fab>
 		<div class="fab">
 			<Fab
-				href={`/title/${seriesID}/season=${season}`}
+				href={`/title/${data.titleDetails.seriesID}/season=${data.titleDetails.Season}`}
 				color="primary"
 				extended
-			>
-				All Episodes
+				data-sveltekit-preload-data="off"
+				>All Episodes
 			</Fab>
 		</div>
-		<Fab color="secondary" mini href={nextEpID} data-sveltekit-reload>
+		<Fab color="secondary" mini href={`/title/${nextEpID}`} data-sveltekit-reload>
 			<Icon class="material-icons right-arrow">arrow_forward</Icon>
 		</Fab>
 	{/if}
@@ -45,38 +46,38 @@
 	<Paper color="secondary">
 		<LayoutGrid>
 			<Cell spanDevices={{ desktop: 5, tablet: 8, phone: 8 }}>
-				<img src={title.Poster} alt="{title.Title} poster" />
+				<img src={data.titleDetails.Poster} alt="{data.titleDetails.Title} poster" />
 			</Cell>
 			<Cell spanDevices={{ desktop: 7, tablet: 8, phone: 8 }}>
 				<InnerGrid>
 					<Cell spanDevices={{ desktop: 9, tablet: 6, phone: 3 }}>
-						{#if type === 'Episode'}
-							<h3>{$selectedTitleDetails.Season}.{$selectedTitleDetails.Episode}</h3>
+						{#if data.titleDetails.Type === 'Episode'}
+							<h3>{data.titleDetails.Season}.{data.titleDetails.Episode}</h3>
 						{/if}
-						<h3>{title.Title}</h3>
+						<h3>{data.titleDetails.Title}</h3>
 						<div style="opacity: 70%;">
-							<span class="move">{title.imdbRating}</span>
+							<span class="move">{data.titleDetails.imdbRating}</span>
 							<FontAwesomeIcon class="icon" icon={faStar} />
-							({title.imdbVotes})
+							({data.titleDetails.imdbVotes})
 							<br />
-							{#if type === 'Episode'}
-								{$selectedTitleDetails.Released}
+							{#if data.titleDetails.Type === 'Episode'}
+								{data.titleDetails.Released}
 							{:else}
-								{title.Year}
+								{data.titleDetails.Year}
 							{/if}
 							<br />
-							{type}
+							{data.titleDetails.Type}
 							<br />
-							{$selectedTitleDetails.Runtime}
+							{data.titleDetails.Runtime}
 							<br />
-							{$selectedTitleDetails.Rated}
+							{data.titleDetails.Rated}
 						</div>
 					</Cell>
 					<Cell spanDevices={{ desktop: 3, tablet: 2, phone: 4 }}>
 						<Fab color="primary" extended class="secondary-btn">Add to Watchlist</Fab>
 					</Cell>
 					<Cell span={12}>
-						{title.Plot}
+						{data.titleDetails.Plot}
 					</Cell>
 				</InnerGrid>
 			</Cell>

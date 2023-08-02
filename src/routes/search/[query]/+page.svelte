@@ -2,13 +2,13 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { searchResults, selectedTitle, hasRun, searchTitlePromise } from '$lib/stores';
 	import { capitaliseFirstLetter } from '$lib/helper';
-	import { page } from '$app/stores';
+	import { page, navigating } from '$app/stores';
 	import Paper from '@smui/paper';
 	import LayoutGrid from '@smui/layout-grid/src/LayoutGrid.svelte';
 	import Cell from '@smui/layout-grid/src/Cell.svelte';
 	import CircularProgress from '@smui/circular-progress';
 	import type { SearchResults } from '$lib/interfaces/SearchResults';
-	import type { Error } from '$lib/interfaces/Error';
+	import type { OmdbError } from '$lib/interfaces/Error';
 
 	let promise: Promise<void> = new Promise(() => {});
 	let searchTitleInput: string;
@@ -38,8 +38,8 @@
 			if (!query) throw new Error('No query');
 			searchTitleInput = '';
 			let res: Response = await fetch(`/api/search?query=${query}`);
-			let json: SearchResults | Error = await res.json();
-			if (json.Response === 'False') throw new Error((json as Error).Error);
+			let json: SearchResults | OmdbError = await res.json();
+			if (json.Response === 'False') throw new Error((json as OmdbError).Error);
 			searchResults.setData(json as SearchResults);
 			searchResults.loadingFalse();
 		} catch (error: any) {
@@ -56,43 +56,50 @@
 </script>
 
 <div class="body">
-	{#await $searchTitlePromise || promise}
+	{#if $navigating}
 		<div class="loading centred-horizontal">
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
-	{:then}
-		{#each $searchResults.Search as title, i}
-			<div class="container">
-				<Paper color="secondary">
-					<LayoutGrid>
-						<Cell spanDevices={{ desktop: 3, tablet: 3, phone: 4 }}>
-							<img src={title.Poster} alt="{title.Title} poster" />
-						</Cell>
-						<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 4 }}>
-							<div class="title">
-								<a
-									href={`/title/${title.imdbID}`}
-									on:click={() => selectedTitle.set(i)}
-									on:keydown={() => handleSelectTitleEnter}
-									>{title.Title}
-								</a>
-							</div>
-							<div class="sub-text">
-								{title.Year}
-							</div>
-							<div class="sub-text">
-								{capitaliseFirstLetter(title.Type)}
-							</div>
-						</Cell>
-					</LayoutGrid>
-				</Paper>
+	{:else}
+		{#await $searchTitlePromise || promise}
+			<div class="loading centred-horizontal">
+				<CircularProgress style="height: 100px; width: 100px" indeterminate />
 			</div>
-		{/each}
-	{:catch error}
-		<div class="container error centre">
-			{error}
-		</div>
-	{/await}
+		{:then}
+			{#each $searchResults.Search as title, i}
+				<div class="container">
+					<Paper color="secondary">
+						<LayoutGrid>
+							<Cell spanDevices={{ desktop: 3, tablet: 3, phone: 4 }}>
+								<img src={title.Poster} alt="{title.Title} poster" />
+							</Cell>
+							<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 4 }}>
+								<div class="title">
+									<a
+										href={`/title/${title.imdbID}`}
+										on:click={() => selectedTitle.set(i)}
+										on:keydown={() => handleSelectTitleEnter}
+										data-sveltekit-preload-data="off"
+										>{title.Title}
+									</a>
+								</div>
+								<div class="sub-text">
+									{title.Year}
+								</div>
+								<div class="sub-text">
+									{capitaliseFirstLetter(title.Type)}
+								</div>
+							</Cell>
+						</LayoutGrid>
+					</Paper>
+				</div>
+			{/each}
+		{:catch error}
+			<div class="container error centre">
+				{error}
+			</div>
+		{/await}
+	{/if}
 </div>
 
 <style>
