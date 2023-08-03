@@ -1,10 +1,6 @@
 <script lang="ts">
 	import '../app.scss';
-	import { onMount, onDestroy, setContext } from 'svelte';
-	import { goto } from '$app/navigation';
-	import type { SearchResults } from '$lib/interfaces/SearchResults';
-	import type { Error } from '$lib/interfaces/Error';
-	import { searchResults, hasRun, searchTitlePromise } from '$lib/stores';
+	import { onMount } from 'svelte';
 	import { Icon } from '@smui/common';
 	import { Input } from '@smui/textfield';
 	import Paper from '@smui/paper';
@@ -14,59 +10,17 @@
 	import IconButton from '@smui/icon-button';
 	import TopAppBar, { Row, Section } from '@smui/top-app-bar';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
+	import { goto } from '$app/navigation';
+	import { searchTitleInput } from '$lib/stores';
 
 	let lightTheme: Boolean;
-	let searchTitleInput: string;
-	let noSearchQuery: Boolean;
-	let promise: Promise<void>;
-
-	setContext('searchTitle', searchTitle);
 
 	onMount((): void => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
 
-	onDestroy((): void => {
-		hasRun.set(false);
-	});
-
-	async function handleSearch(): Promise<void> {
-		try {
-			promise = searchTitle(searchTitleInput);
-			searchTitlePromise.set(promise);
-			await promise;
-			searchTitlePromise.set(promise);
-		} catch (error: unknown) {
-			searchTitlePromise.set(promise);
-		}
-	}
-
 	function handleSearchEnterPress(event: KeyboardEvent | CustomEvent): void {
-		if ((event as KeyboardEvent).key === 'Enter') handleSearch();
-	}
-
-	async function searchTitle(query: string): Promise<void> {
-		try {
-			hasRun.set(true);
-			searchResults.loadingTrue();
-			if (query) {
-				noSearchQuery = false;
-				goto(`/search/${encodeURIComponent(query)}`);
-			} else {
-				noSearchQuery = true;
-				throw new Error('No query');
-			}
-			searchTitleInput = '';
-			let res: Response = await fetch(`/api/search?query=${query}`);
-			let json: SearchResults | Error = await res.json();
-			if (json.Response === 'False') throw new Error((json as Error).Error);
-			searchResults.setData(json as SearchResults);
-			searchResults.loadingFalse();
-		} catch (error: any) {
-			searchResults.loadingFalse();
-			console.log(error);
-			throw error;
-		}
+		if ((event as KeyboardEvent).key === 'Enter') goto(`/search/${$searchTitleInput}`);
 	}
 </script>
 
@@ -89,11 +43,11 @@
 				<a
 					href="/"
 					on:click={() => {
-						searchResults.reset();
-						location.assign('/');
-						setTimeout(() => location.reload(), 0);
-					}}>MTVDB</a
+						searchTitleInput.set(null);
+					}}
 				>
+					MTVDB
+				</a>
 			</h4>
 		</Section>
 		<Section align="end" toolbar>
@@ -121,22 +75,17 @@
 			<Paper class="paper" elevation={6}>
 				<Icon class="material-icons">search</Icon>
 				<Input
-					bind:value={searchTitleInput}
+					bind:value={$searchTitleInput}
 					on:keydown={handleSearchEnterPress}
 					placeholder="Search for a Movie or Show"
 					class="input"
 				/>
 			</Paper>
-			<Fab on:click={handleSearch} color="primary" mini class="fab">
+			<Fab href={`/search/${$searchTitleInput}`} color="primary" mini class="fab">
 				<Icon class="material-icons">arrow_forward</Icon>
 			</Fab>
 		</Cell>
 	</LayoutGrid>
-	{#if noSearchQuery}
-		<div class="centre">
-			<div style="color: red;">Please enter a search query</div>
-		</div>
-	{/if}
 </div>
 
 <slot />

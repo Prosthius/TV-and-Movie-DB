@@ -1,7 +1,6 @@
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import type { SearchResultsWritable, SearchResults } from '$lib/interfaces/SearchResults';
-import type { Error } from '$lib/interfaces/Error';
 import type { TitleDetails, TitleDetailsWritable } from '$lib/interfaces/TitleDetails';
 
 // TODO - move each variable to separate files
@@ -92,6 +91,6 @@ function createSelectedTitleDetails(): TitleDetailsWritable {
 
 export const selectedTitle: Writable<number> = writable<number>(0);
 
-export const hasRun: Writable<Boolean> = writable<Boolean>(false);
+export const searchTitlePromise: Writable<Promise<void> | null> = writable<null>();
 
-export const searchTitlePromise: Writable<Promise<void> | null> = writable<null>(null);
+export const searchTitleInput: Writable<string | null> = writable<null>();

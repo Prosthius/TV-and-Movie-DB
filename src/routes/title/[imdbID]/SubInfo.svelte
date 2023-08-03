@@ -2,14 +2,15 @@
 	import { selectedTitleDetails } from '$lib/stores';
 	import { capitaliseFirstLetter } from '$lib/helper';
 	import Paper, { Title } from '@smui/paper';
-	import type { StreamingAvailability } from '$lib/interfaces/StreamingAvailability';
+	import type { PageData } from './$types';
 
-	export let streamingAvailability: StreamingAvailability;
-	$: director = $selectedTitleDetails.Director.split(', ');
-	$: writer = $selectedTitleDetails.Writer.split(', ');
-	$: genre = $selectedTitleDetails.Genre.split(', ');
+	export let data: PageData;
+	let locale: string = 'en-AU';
+	$: director = data.titleDetails.Director.split(', ');
+	$: writer = data.titleDetails.Writer.split(', ');
+	$: genre = data.titleDetails.Genre.split(', ');
 	$: timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-	$: locale = navigator.language;
+	// $: locale = navigator.language;
 
 	function unixSecToTime(unixSec: number): string {
 		const date: Date = new Date(unixSec * 1000);
@@ -32,42 +33,41 @@
 		{:else}
 			<Title>Genre</Title>
 		{/if}
-		{$selectedTitleDetails.Genre}
+		{data.titleDetails.Genre}
 	</Paper>
 </div>
 <div class="container">
 	<Paper>
 		<Title>Streaming Services</Title>
-		{#if streamingAvailability?.result.streamingInfo.au}
-			{#each Object.keys(streamingAvailability.result.streamingInfo.au) as service}
-				<div class="divider">
-					<div class="subtitle">
-						{capitaliseFirstLetter(service)}
-					</div>
-					{#each streamingAvailability.result.streamingInfo.au[service] as streamingService}
-						<div class="indent">
-							<div>
-								<a target="_blank" href={streamingService.link}>
-									{capitaliseFirstLetter(streamingService.type)}
-								</a>
-							</div>
-							{#if streamingService.price}
-								<div>
-									${streamingService.price.amount}
-									{streamingService.price.currency}
-								</div>
-							{/if}
-							<div>
-								{streamingService.quality.toLocaleUpperCase()}
-							</div>
-							{#if streamingService.leaving !== 0}
-								<div>
-									Leaving on {unixSecToTime(streamingService.leaving)}
-								</div>
-							{/if}
-						</div>
-					{/each}
+		{#if data.streaming?.result.streamingInfo.au}
+			{#each Object.keys(data.streaming?.result.streamingInfo.au) as service}
+				<div class="subtitle">
+					{capitaliseFirstLetter(service)}
 				</div>
+				{#each data.streaming?.result.streamingInfo.au[service] as streamingService}
+					<div class="indent">
+						<div>
+							<a target="_blank" href={streamingService.link}>
+								{capitaliseFirstLetter(streamingService.type)}
+							</a>
+						</div>
+						{#if streamingService.price}
+							<div>
+								${streamingService.price.amount}
+								{streamingService.price.currency}
+							</div>
+						{/if}
+						<div>
+							{streamingService.quality.toLocaleUpperCase()}
+						</div>
+						{#if streamingService.leaving !== 0}
+							<div>
+								Leaving on {unixSecToTime(streamingService.leaving)}
+							</div>
+						{/if}
+					</div>
+				{/each}
+				<div class="divider rating" />
 			{/each}
 		{:else}
 			<div>Streaming service information currently unavailable</div>
@@ -78,7 +78,7 @@
 	<Paper>
 		<div class="paper-container">
 			<Title>Top Cast</Title>
-			{$selectedTitleDetails.Actors}
+			{data.titleDetails.Actors}
 		</div>
 		<div class="divider" />
 		<div class="paper-container">
@@ -87,7 +87,7 @@
 			{:else}
 				<Title>Director</Title>
 			{/if}
-			{$selectedTitleDetails.Director}
+			{data.titleDetails.Director}
 		</div>
 		<div class="divider" />
 		<div class="paper-container">
@@ -96,15 +96,15 @@
 			{:else}
 				<Title>Writer</Title>
 			{/if}
-			{$selectedTitleDetails.Writer}
+			{data.titleDetails.Writer}
 		</div>
 	</Paper>
 </div>
-{#if $selectedTitleDetails.Ratings.length > 1}
+{#if data.titleDetails.Ratings.length > 1}
 	<div class="container">
 		<Paper>
 			<Title>Ratings</Title>
-			{#each $selectedTitleDetails.Ratings as rating}
+			{#each data.titleDetails.Ratings as rating}
 				<div class="subtitle">
 					{rating.Source}
 				</div>
@@ -120,25 +120,25 @@
 	<Paper>
 		<div class="paper-container">
 			<Title>Language</Title>
-			{$selectedTitleDetails.Language}
+			{data.titleDetails.Language}
 		</div>
 		<div class="divider" />
 		<div class="paper-container">
 			<Title>Country</Title>
-			{$selectedTitleDetails.Country}
+			{data.titleDetails.Country}
 		</div>
-		{#if $selectedTitleDetails.Awards !== 'N/A'}
+		{#if data.titleDetails.Awards !== 'N/A'}
 			<div class="divider" />
 			<div class="paper-container">
 				<Title>Awards</Title>
-				{$selectedTitleDetails.Awards}
+				{data.titleDetails.Awards}
 			</div>
 		{/if}
-		{#if $selectedTitleDetails.BoxOffice}
+		{#if data.titleDetails.BoxOffice}
 			<div class="divider" />
 			<div class="paper-container">
 				<Title>Box Office</Title>
-				{$selectedTitleDetails.BoxOffice}
+				{data.titleDetails.BoxOffice}
 			</div>
 		{/if}
 	</Paper>
@@ -167,6 +167,14 @@
 		margin-bottom: auto;
 		padding-bottom: 0px;
 		box-shadow: none;
+	}
+
+	.divider.rating {
+		margin-top: 14px;
+	}
+
+	.divider.rating:last-child {
+		margin-top: auto;
 	}
 
 	.indent {
