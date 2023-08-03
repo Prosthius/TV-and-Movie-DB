@@ -34,7 +34,7 @@
 								<a
 									href={`/title/${title.imdbID}`}
 									on:click={() => selectedTitle.set(i)}
-									on:click={() => searchTitleInput.set(null)}
+									on:click={() => searchTitleInput.set('')}
 									on:keydown={() => handleSelectTitleEnter}
 									data-sveltekit-preload-data="off"
 									>{title.Title}

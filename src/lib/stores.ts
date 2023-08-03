@@ -91,4 +91,4 @@ function createSelectedTitleDetails(): TitleDetailsWritable {
 
 export const selectedTitle: Writable<number> = writable<number>(0);
 
-export const searchTitleInput: Writable<string | null> = writable<null>();
+export const searchTitleInput: Writable<string> = writable<string>('');

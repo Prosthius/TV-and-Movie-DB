@@ -43,7 +43,7 @@
 				<a
 					href="/"
 					on:click={() => {
-						searchTitleInput.set(null);
+						searchTitleInput.set('');
 					}}
 				>
 					MTVDB
