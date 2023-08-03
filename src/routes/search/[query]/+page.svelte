@@ -1,53 +1,15 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { searchResults, selectedTitle, hasRun, searchTitlePromise } from '$lib/stores';
+	import { selectedTitle, searchTitleInput } from '$lib/stores';
 	import { capitaliseFirstLetter } from '$lib/helper';
-	import { page, navigating } from '$app/stores';
+	import { navigating } from '$app/stores';
 	import Paper from '@smui/paper';
 	import LayoutGrid from '@smui/layout-grid/src/LayoutGrid.svelte';
 	import Cell from '@smui/layout-grid/src/Cell.svelte';
 	import CircularProgress from '@smui/circular-progress';
-	import type { SearchResults } from '$lib/interfaces/SearchResults';
-	import type { OmdbError } from '$lib/interfaces/Error';
+	import type { PageData } from './$types';
 
-	let promise: Promise<void> = new Promise(() => {});
-	let searchTitleInput: string;
-
-	onMount(async (): Promise<void> => {
-		if (!$hasRun) {
-			try {
-				promise = searchTitle($page.params.query);
-				searchTitlePromise.set(promise);
-				await promise;
-				searchTitlePromise.set(promise);
-			} catch (error: unknown) {
-				console.log(error);
-				searchTitlePromise.set(promise);
-			}
-		}
-	});
-
-	onDestroy((): void => {
-		hasRun.set(false);
-	});
-
-	async function searchTitle(query: string): Promise<void> {
-		try {
-			searchResults.loadingTrue();
-			hasRun.set(true);
-			if (!query) throw new Error('No query');
-			searchTitleInput = '';
-			let res: Response = await fetch(`/api/search?query=${query}`);
-			let json: SearchResults | OmdbError = await res.json();
-			if (json.Response === 'False') throw new Error((json as OmdbError).Error);
-			searchResults.setData(json as SearchResults);
-			searchResults.loadingFalse();
-		} catch (error: any) {
-			searchResults.loadingFalse();
-			console.log(error);
-			throw error;
-		}
-	}
+	export let data: PageData;
 
 	function handleSelectTitleEnter(event: KeyboardEvent): void {
 		const value: number = parseInt((event.target as HTMLInputElement).value);
@@ -61,44 +23,35 @@
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
 	{:else}
-		{#await $searchTitlePromise || promise}
-			<div class="loading centred-horizontal">
-				<CircularProgress style="height: 100px; width: 100px" indeterminate />
+		{#each data.searchResults.Search as title, i}
+			<div class="container">
+				<Paper color="secondary">
+					<LayoutGrid>
+						<Cell spanDevices={{ desktop: 3, tablet: 3, phone: 4 }}>
+							<img src={title.Poster} alt="{title.Title} poster" />
+						</Cell>
+						<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 4 }}>
+							<div class="title">
+								<a
+									href={`/title/${title.imdbID}`}
+									on:click={() => selectedTitle.set(i)}
+									on:click={() => searchTitleInput.set(null)}
+									on:keydown={() => handleSelectTitleEnter}
+									data-sveltekit-preload-data="off"
+									>{title.Title}
+								</a>
+							</div>
+							<div class="sub-text">
+								{title.Year}
+							</div>
+							<div class="sub-text">
+								{capitaliseFirstLetter(title.Type)}
+							</div>
+						</Cell>
+					</LayoutGrid>
+				</Paper>
 			</div>
-		{:then}
-			{#each $searchResults.Search as title, i}
-				<div class="container">
-					<Paper color="secondary">
-						<LayoutGrid>
-							<Cell spanDevices={{ desktop: 3, tablet: 3, phone: 4 }}>
-								<img src={title.Poster} alt="{title.Title} poster" />
-							</Cell>
-							<Cell spanDevices={{ desktop: 9, tablet: 5, phone: 4 }}>
-								<div class="title">
-									<a
-										href={`/title/${title.imdbID}`}
-										on:click={() => selectedTitle.set(i)}
-										on:keydown={() => handleSelectTitleEnter}
-										data-sveltekit-preload-data="off"
-										>{title.Title}
-									</a>
-								</div>
-								<div class="sub-text">
-									{title.Year}
-								</div>
-								<div class="sub-text">
-									{capitaliseFirstLetter(title.Type)}
-								</div>
-							</Cell>
-						</LayoutGrid>
-					</Paper>
-				</div>
-			{/each}
-		{:catch error}
-			<div class="container error centre">
-				{error}
-			</div>
-		{/await}
+		{/each}
 	{/if}
 </div>
 

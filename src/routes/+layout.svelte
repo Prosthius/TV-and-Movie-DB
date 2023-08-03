@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '../app.scss';
 	import { onMount, onDestroy } from 'svelte';
-	import { searchResults, hasRun } from '$lib/stores';
 	import { Icon } from '@smui/common';
 	import { Input } from '@smui/textfield';
 	import Paper from '@smui/paper';
@@ -11,21 +10,23 @@
 	import IconButton from '@smui/icon-button';
 	import TopAppBar, { Row, Section } from '@smui/top-app-bar';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
+	import { goto } from '$app/navigation';
+	import { searchTitleInput } from '$lib/stores';
 
 	let lightTheme: Boolean;
-	let searchTitleInput: string;
 
 	onMount((): void => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
 
 	onDestroy((): void => {
-		hasRun.set(false);
-	});
+		// searchTitleInput = '';
+	})
 
 	function handleSearchEnterPress(event: KeyboardEvent | CustomEvent): void {
-		if ((event as KeyboardEvent).key === 'Enter')
-			window.location.href = `/search/${searchTitleInput}`;
+		if ((event as KeyboardEvent).key === 'Enter') {
+			goto(`/search/${$searchTitleInput}`);
+		}
 	}
 </script>
 
@@ -48,9 +49,9 @@
 				<a
 					href="/"
 					on:click={() => {
-						searchResults.reset();
-						location.assign('/');
-						setTimeout(() => location.reload(), 0);
+						// searchResults.reset();
+						// location.assign('/');
+						// setTimeout(() => location.reload(), 0);
 					}}>MTVDB</a
 				>
 			</h4>
@@ -80,19 +81,13 @@
 			<Paper class="paper" elevation={6}>
 				<Icon class="material-icons">search</Icon>
 				<Input
-					bind:value={searchTitleInput}
+					bind:value={$searchTitleInput}
 					on:keydown={handleSearchEnterPress}
 					placeholder="Search for a Movie or Show"
 					class="input"
 				/>
 			</Paper>
-			<Fab
-				href={`/search/${searchTitleInput}`}
-				data-sveltekit-reload
-				color="primary"
-				mini
-				class="fab"
-			>
+			<Fab href={`/search/${$searchTitleInput}`} color="primary" mini class="fab">
 				<Icon class="material-icons">arrow_forward</Icon>
 			</Fab>
 		</Cell>

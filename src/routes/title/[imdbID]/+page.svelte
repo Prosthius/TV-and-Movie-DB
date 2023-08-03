@@ -6,8 +6,6 @@
 	import CircularProgress from '@smui/circular-progress';
 
 	export let data: PageData;
-	let nextEpID: string;
-	let prevEpID: string;
 </script>
 
 <div class="body">
@@ -16,7 +14,7 @@
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
 	{:else}
-		<MainInfo {data} {nextEpID} {prevEpID} />
+		<MainInfo {data} />
 		<SubInfo {data} />
 	{/if}
 </div>

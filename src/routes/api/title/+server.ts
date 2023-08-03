@@ -5,7 +5,7 @@ import type { OmdbError } from '$lib/interfaces/Error';
 import { PRIVATE_API_KEY as API_KEY } from '$env/static/private';
 
 interface Query {
-    imdbID?: string;
+    imdbID: string;
     season?: string;
     episode?: string;
     plotLength?: string;
@@ -23,7 +23,7 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
         };
         if ((query.season && !query.episode) || (!query.season && query.episode))
             throw error(400, 'Must provide episode and season');
-        if (!isValidImdbID(query.imdbID as string))
+        if (!isValidImdbID(query.imdbID))
             throw error(404, 'Not Found');
         !query.plotLength ? query.plotLength = 'full' : null;
 
