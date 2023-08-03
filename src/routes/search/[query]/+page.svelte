@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
 	import { selectedTitle, searchTitleInput } from '$lib/stores';
 	import { capitaliseFirstLetter } from '$lib/helper';
 	import { navigating } from '$app/stores';
