@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.scss';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { Icon } from '@smui/common';
 	import { Input } from '@smui/textfield';
 	import Paper from '@smui/paper';
@@ -19,14 +19,8 @@
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
 
-	onDestroy((): void => {
-		// searchTitleInput = '';
-	})
-
 	function handleSearchEnterPress(event: KeyboardEvent | CustomEvent): void {
-		if ((event as KeyboardEvent).key === 'Enter') {
-			goto(`/search/${$searchTitleInput}`);
-		}
+		if ((event as KeyboardEvent).key === 'Enter') goto(`/search/${$searchTitleInput}`);
 	}
 </script>
 
@@ -49,11 +43,11 @@
 				<a
 					href="/"
 					on:click={() => {
-						// searchResults.reset();
-						// location.assign('/');
-						// setTimeout(() => location.reload(), 0);
-					}}>MTVDB</a
+						searchTitleInput.set(null);
+					}}
 				>
+					MTVDB
+				</a>
 			</h4>
 		</Section>
 		<Section align="end" toolbar>
