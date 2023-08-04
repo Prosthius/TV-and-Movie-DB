@@ -5,36 +5,48 @@ import type { StreamingAvailability } from '$lib/interfaces/StreamingAvailabilit
 import type { NextOrPrevEp } from '$lib/interfaces/NextOrPrevEp';
 import { error } from '@sveltejs/kit';
 import { get } from 'svelte/store';
-import { selectedTitleDetails } from '$lib/stores';
+import { selectedTitleDetails, navigatedTo } from '$lib/stores';
 
 export const load = (async ({ fetch, params }) => {
     try {
-        // console.log(get(selectedTitleDetails));
+        console.log(get(navigatedTo));
         let streaming: StreamingAvailability | undefined;
         let streamingError: StreamingError | undefined;
         let currentSeasonDetails: TitleDetails[] = [];
-        let prevSeasonDetails: TitleDetails[] = [];
+        let prevSeasonDetails: TitleDetails[] | null = [];
         let titleDetails: TitleDetails;
         let streamingJSON: StreamingAvailability | StreamingError;
         let seriesDetails: TitleDetails | undefined;
         let nextEp: NextOrPrevEp | undefined;
         let prevEp: NextOrPrevEp | undefined;
 
-        titleDetails = await getInfo(fetch, params.imdbID);
+        titleDetails = get(selectedTitleDetails);
+
+        if (!get(navigatedTo)) {
+            selectedTitleDetails.set(await getInfo(fetch, params.imdbID));
+            titleDetails = get(selectedTitleDetails);
+            console.log(titleDetails);
+        }
+
+        // titleDetails = await getInfo(fetch, params.imdbID);
         if (titleDetails.Type === 'episode') {
-            seriesDetails = await getInfo(fetch, titleDetails.seriesID as string);
-            currentSeasonDetails = await getSeason(
-                fetch,
-                titleDetails.seriesID as string,
-                parseInt(titleDetails.Season as string)
-            );
-            titleDetails.Season != '1' && titleDetails.Episode == '1' ?
-                prevSeasonDetails = await getSeason(
+            [streamingJSON, seriesDetails, currentSeasonDetails, prevSeasonDetails] = await Promise.all([
+                getStreamAvail(fetch, titleDetails.seriesID as string),
+                getInfo(fetch, titleDetails.seriesID as string),
+                getSeason(
                     fetch,
                     titleDetails.seriesID as string,
-                    parseInt(titleDetails.Season as string) - 1,
-                ) :
-                null;
+                    parseInt(titleDetails.Season as string)
+                ),
+                titleDetails.Season != '1' && titleDetails.Episode == '1' ?
+                    getSeason(
+                        fetch,
+                        titleDetails.seriesID as string,
+                        parseInt(titleDetails.Season as string) - 1,
+                    ) :
+                    null,
+            ]);
+
             nextEp = getNextEp(
                 currentSeasonDetails,
                 parseInt(titleDetails.Episode as string),
@@ -42,13 +54,13 @@ export const load = (async ({ fetch, params }) => {
                 parseInt(seriesDetails.totalSeasons as string)
             );
             prevEp = getPrevEp(
-                prevSeasonDetails,
+                prevSeasonDetails as TitleDetails[],
                 parseInt(titleDetails.Episode as string),
                 parseInt(titleDetails.Season as string),
             );
+        } else {
+            streamingJSON = await getStreamAvail(fetch, params.imdbID);
         }
-
-        streamingJSON = await getStreamAvail(fetch, params.imdbID);
 
         IsStreamingAvailability(streamingJSON) ?
             streaming = streamingJSON :
@@ -68,6 +80,8 @@ export const load = (async ({ fetch, params }) => {
                 titleDetails.Type = titleDetails.Type;
                 break;
         }
+
+        selectedTitleDetails.loadingFalse();
 
         return {
             titleDetails,

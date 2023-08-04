@@ -53,7 +53,7 @@
 				>All Episodes
 			</Fab>
 		</div>
-		<Fab color="secondary" mini href={nextEpTrue()} data-sveltekit-preload-data="off">
+		<Fab color="secondary" mini href={nextEpTrue()} data-sveltekit-preload-data="off" rel="external">
 			<Icon class="material-icons right-arrow">arrow_forward</Icon>
 		</Fab>
 	{/if}

@@ -1,17 +1,16 @@
 import type { PageLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { get } from 'svelte/store';
-import { error } from '@sveltejs/kit';
-import { selectedTitleDetails } from '$lib/stores';
+import { selectedTitleDetails, navigatedTo } from '$lib/stores';
 import type { TitleDetails } from '$lib/interfaces/TitleDetails';
 import type { OmdbError } from '$lib/interfaces/Error';
 
 export const load = (async ({ fetch, params }) => {
     selectedTitleDetails.set(await (getInfo(fetch, params.imdbID, params.seasonNo, params.episodeNo)));
-    const details = get(selectedTitleDetails);
-    let imdbID: string = details.imdbID;
+    const titleDetails: TitleDetails = get(selectedTitleDetails);
+    navigatedTo.set(true);
 
-    throw redirect(303, `/title/${imdbID}`);
+    throw redirect(303, `/title/${titleDetails.imdbID}`);
 }) satisfies PageLoad;
 
 async function getInfo(

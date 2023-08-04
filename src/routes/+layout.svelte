@@ -13,7 +13,7 @@
 	import { goto } from '$app/navigation';
 	import { searchTitleInput } from '$lib/stores';
 
-	let lightTheme: Boolean;
+	let lightTheme: boolean;
 
 	onMount((): void => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;

@@ -1,13 +1,19 @@
 <script lang="ts">
 	import MainInfo from './MainInfo.svelte';
 	import SubInfo from './SubInfo.svelte';
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { navigating } from '$app/stores';
+	import { navigatedTo } from '$lib/stores';
 	import CircularProgress from '@smui/circular-progress';
 
 	export let data: PageData;
+	
+	onMount(() => {
+		console.log('mount');
+	})
 </script>
-
+{$navigatedTo}
 <div class="body">
 	{#if $navigating}
 		<div class="loading centred-horizontal">
