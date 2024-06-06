@@ -8,6 +8,7 @@
 	import type { PageData } from './$types';
 	import { navigating } from '$app/stores';
 	import CircularProgress from '@smui/circular-progress';
+	import { navigatedTo } from '$lib/stores';
 
 	export let data: PageData;
 
@@ -41,7 +42,14 @@
 			</Fab>
 		</div>
 	{:else if data.titleDetails.Type === 'Episode'}
-		<Fab color="secondary" mini href={prevEpTrue()} data-sveltekit-preload-data="off">
+		<Fab
+			color="secondary"
+			mini
+			href={prevEpTrue()}
+			on:click={() => navigatedTo.set(true)}
+			data-sveltekit-preload-data="off"
+			data-sveltekit-reload
+		>
 			<Icon class="material-icons left-arrow">arrow_backward</Icon>
 		</Fab>
 		<div class="fab">
@@ -53,7 +61,14 @@
 				>All Episodes
 			</Fab>
 		</div>
-		<Fab color="secondary" mini href={nextEpTrue()} data-sveltekit-preload-data="off" rel="external">
+		<Fab
+			color="secondary"
+			mini
+			href={nextEpTrue()}
+			on:click={() => navigatedTo.set(true)}
+			data-sveltekit-preload-data="off"
+			data-sveltekit-reload
+		>
 			<Icon class="material-icons right-arrow">arrow_forward</Icon>
 		</Fab>
 	{/if}

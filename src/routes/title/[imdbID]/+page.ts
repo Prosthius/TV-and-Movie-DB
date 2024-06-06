@@ -9,7 +9,6 @@ import { selectedTitleDetails, navigatedTo } from '$lib/stores';
 
 export const load = (async ({ fetch, params }) => {
     try {
-        console.log(get(navigatedTo));
         let streaming: StreamingAvailability | undefined;
         let streamingError: StreamingError | undefined;
         let currentSeasonDetails: TitleDetails[] = [];
@@ -25,8 +24,8 @@ export const load = (async ({ fetch, params }) => {
         if (!get(navigatedTo)) {
             selectedTitleDetails.set(await getInfo(fetch, params.imdbID));
             titleDetails = get(selectedTitleDetails);
-            console.log(titleDetails);
         }
+
 
         // titleDetails = await getInfo(fetch, params.imdbID);
         if (titleDetails.Type === 'episode') {
@@ -81,7 +80,7 @@ export const load = (async ({ fetch, params }) => {
                 break;
         }
 
-        selectedTitleDetails.loadingFalse();
+        navigatedTo.set(false);
 
         return {
             titleDetails,
@@ -103,6 +102,7 @@ async function getInfo(
     imdbID: string,
 ): Promise<TitleDetails> {
     try {
+        console.log('getInfo()');
         let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=full`);
         if (!res.ok) throw error(404, 'Not Found');
         let json: TitleDetails | OmdbError = await res.json();

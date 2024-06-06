@@ -4,8 +4,8 @@
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { navigating } from '$app/stores';
-	import { navigatedTo } from '$lib/stores';
 	import CircularProgress from '@smui/circular-progress';
+	import { navigatedTo } from '$lib/stores';
 
 	export let data: PageData;
 	
@@ -13,9 +13,9 @@
 		console.log('mount');
 	})
 </script>
-{$navigatedTo}
+
 <div class="body">
-	{#if $navigating}
+	{#if $navigating || $navigatedTo} <!-- || data.titleDetails.imdbID !== $page.params.imdbID -->
 		<div class="loading centred-horizontal">
 			<CircularProgress style="height: 100px; width: 100px" indeterminate />
 		</div>
