@@ -11,7 +11,7 @@ export const load = (async ({ fetch, params }) => {
     const details = get(selectedTitleDetails);
     let imdbID: string = details.imdbID;
 
-    throw redirect(303, `/title/${imdbID}`);
+    redirect(303, `/title/${imdbID}`);
 }) satisfies PageLoad;
 
 async function getInfo(

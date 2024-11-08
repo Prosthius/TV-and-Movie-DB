@@ -22,9 +22,9 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
             plotLength: params.get('plot') || '',
         };
         if ((query.season && !query.episode) || (!query.season && query.episode))
-            throw error(400, 'Must provide episode and season');
+            error(400, 'Must provide episode and season');
         if (!isValidImdbID(query.imdbID))
-            throw error(404, 'Not Found');
+            error(404, 'Not Found');
         !query.plotLength ? query.plotLength = 'full' : null;
 
         let host: string = `https://www.omdbapi.com/?apikey=${API_KEY}`;
