@@ -26,7 +26,7 @@
 		"@smui/common": "^7.0.0-beta.0",
 		"@smui/fab": "^7.0.0-beta.0",
 		"@smui/icon-button": "^7.0.0-beta.3",
-		"@smui/layout-grid": "^7.0.0-beta.0",
+		"@smui/layout-grid": "^7.0.0",
 		"@smui/paper": "^7.0.0-beta.0",
 		"@smui/select": "^7.0.0-beta.8",
 		"@smui/textfield": "^7.0.0-beta.0",

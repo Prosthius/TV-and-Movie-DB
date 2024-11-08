@@ -4,16 +4,15 @@
 	import { Icon } from '@smui/common';
 	import { Input } from '@smui/textfield';
 	import Paper from '@smui/paper';
-	import LayoutGrid from '@smui/layout-grid/src/LayoutGrid.svelte';
-	import Cell from '@smui/layout-grid/src/Cell.svelte';
-	import Fab from '@smui/fab/src/Fab.svelte';
+	import LayoutGrid, { Cell } from '@smui/layout-grid';
+	import Fab from '@smui/fab';
 	import IconButton from '@smui/icon-button';
 	import TopAppBar, { Row, Section } from '@smui/top-app-bar';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
 	import { goto } from '$app/navigation';
 	import { searchTitleInput } from '$lib/stores';
 
-	let lightTheme: Boolean;
+	let lightTheme: boolean;
 
 	onMount((): void => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;

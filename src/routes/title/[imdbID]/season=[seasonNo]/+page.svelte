@@ -6,10 +6,9 @@
 	import CircularProgress from '@smui/circular-progress';
 	import Select, { Option } from '@smui/select';
 	import Paper, { Title } from '@smui/paper';
-	import LayoutGrid, { Cell } from '@smui/layout-grid';
+	import LayoutGrid, { Cell, InnerGrid } from '@smui/layout-grid';
 	import Fab from '@smui/fab';
 	import { goto } from '$app/navigation';
-	import InnerGrid from '@smui/layout-grid/src/InnerGrid.svelte';
 	import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
 	import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
 	import { navigating } from '$app/stores';

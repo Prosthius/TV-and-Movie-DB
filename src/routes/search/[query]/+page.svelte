@@ -3,8 +3,7 @@
 	import { capitaliseFirstLetter } from '$lib/helper';
 	import { navigating } from '$app/stores';
 	import Paper from '@smui/paper';
-	import LayoutGrid from '@smui/layout-grid/src/LayoutGrid.svelte';
-	import Cell from '@smui/layout-grid/src/Cell.svelte';
+	import LayoutGrid, { Cell } from '@smui/layout-grid';
 	import CircularProgress from '@smui/circular-progress';
 	import type { PageData } from './$types';
 
