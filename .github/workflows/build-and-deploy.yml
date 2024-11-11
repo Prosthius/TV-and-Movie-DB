@@ -30,4 +30,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy ./svelte-kit --project-name=TV-and-Movie-DB
+          command: pages deploy ./svelte-kit --project-name=tv-and-movie-db
