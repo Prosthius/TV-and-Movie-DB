@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  build:
+  Build and Deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,6 +21,9 @@ jobs:
 
       - name: Build Project
         run: npm run build
+          env:
+            PRIVATE_API_KEY: ${{ secrets.PRIVATE_API_KEY }}
+            PRIVATE_API_KEY_SA: ${{ secrets.PRIVATE_API_KEY_SA }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
