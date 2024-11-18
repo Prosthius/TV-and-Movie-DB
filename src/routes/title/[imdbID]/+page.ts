@@ -90,7 +90,7 @@ async function getInfo(
 ): Promise<TitleDetails> {
     try {
         let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=full`);
-        if (!res.ok) throw error(404, 'Not Found');
+        if (!res.ok) error(404, 'Not Found');
         let json: TitleDetails | OmdbError = await res.json();
         if (json.Response === 'False') throw new Error((json as OmdbError).Error);
         selectedTitleDetails.setData(json as TitleDetails);

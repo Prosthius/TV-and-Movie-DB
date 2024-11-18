@@ -1,0 +1,33 @@
+name: Build and Deploy to Cloudflare Pages
+
+on:
+  push:
+
+jobs:
+  Build-and-Deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        run: npm run build
+        env:
+          PRIVATE_API_KEY: ${{ secrets.PRIVATE_API_KEY }}
+          PRIVATE_API_KEY_SA: ${{ secrets.PRIVATE_API_KEY_SA }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ./.svelte-kit/cloudflare --project-name=tv-and-movie-db
