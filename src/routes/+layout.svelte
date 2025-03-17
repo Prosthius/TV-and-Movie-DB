@@ -9,11 +9,13 @@
 	import IconButton from '@smui/icon-button';
 	import TopAppBar, { Row, Section } from '@smui/top-app-bar';
 	import Tooltip, { Wrapper } from '@smui/tooltip';
+	import Select, { Option } from '@smui/select';
 	import { goto } from '$app/navigation';
 	import { searchTitleInput } from '$lib/stores';
 
 	let lightTheme: boolean;
-
+	$: value = users[0];
+	let users = ['UserOne', 'UserTwo'];
 	onMount((): void => {
 		lightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 	});
@@ -50,6 +52,11 @@
 			</h4>
 		</Section>
 		<Section align="end" toolbar>
+			<Select bind:value label="User Select" style="color: black;">
+				{#each users as user}
+					<Option value={user}>{user}</Option>
+				{/each}
+			</Select>
 			<Wrapper>
 				<IconButton
 					toggle
