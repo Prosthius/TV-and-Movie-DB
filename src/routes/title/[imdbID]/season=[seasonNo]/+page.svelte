@@ -3,21 +3,17 @@
 	import { page } from '$app/stores';
 	import { selectedTitleDetails } from '$lib/stores';
 	import type { TitleDetails } from '$lib/interfaces/TitleDetails';
-	import CircularProgress from '@smui/circular-progress';
-	import Select, { Option } from '@smui/select';
-	import Paper, { Title } from '@smui/paper';
-	import LayoutGrid, { Cell, InnerGrid } from '@smui/layout-grid';
-	import Fab from '@smui/fab';
 	import { goto } from '$app/navigation';
-	import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-	import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
 	import { navigating } from '$app/stores';
+	import SeasonSelectorCard from './SeasonSelectorCard.svelte';
+	import LoadingIcon from '../../../LoadingIcon.svelte';
+	import Episode from './Episode.svelte';
 
 	let episodes: TitleDetails[] = [];
 	let promise: Promise<[void, void]> = new Promise(() => {});
 	let loadEpisodesPromise: Promise<void>;
 	let totalSeasons: string[] = [];
-	let selectedSeason: string;
+	$: selectedSeason = $page.params.seasonNo;
 	$: currentImdbID = $page.params.imdbID;
 
 	onMount(async (): Promise<void> => {
@@ -35,10 +31,13 @@
 
 	async function getShowDetails(imdbID: string): Promise<void> {
 		try {
-			let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=short`);
-			let json: TitleDetails = await res.json();
-			selectedTitleDetails.set(json);
-			if ($selectedTitleDetails.Response === 'False') throw new Error($selectedTitleDetails.Error);
+			if ($selectedTitleDetails.imdbID != currentImdbID) {
+				let res: Response = await fetch(`/api/title?imdbID=${imdbID}&plot=short`);
+				let json: TitleDetails = await res.json();
+				selectedTitleDetails.set(json);
+				if ($selectedTitleDetails.Response === 'False')
+					throw new Error($selectedTitleDetails.Error);
+			}
 			for (let i: number = 0; i < parseInt($selectedTitleDetails.totalSeasons as string); i++) {
 				totalSeasons.push((i + 1).toString());
 			}
@@ -61,7 +60,7 @@
 		}
 	}
 
-	function changeSeason(season: string) {
+	function changeSeason(season: string): void {
 		if (season !== $page.params.seasonNo) {
 			goto(`/title/${currentImdbID}/season=${season}`);
 			loadEpisodesPromise = new Promise(async (resolve, reject) => {
@@ -79,76 +78,18 @@
 
 <div class="body">
 	{#if $navigating}
-		<div class="loading centred-horizontal">
-			<CircularProgress style="height: 100px; width: 100px" indeterminate />
-		</div>
+		<LoadingIcon />
 	{:else}
 		{#await promise}
-			<div class="loading centred-horizontal">
-				<CircularProgress style="height: 100px; width: 100px" indeterminate />
-			</div>
+			<LoadingIcon />
 		{:then}
-			<div class="container">
-				<Fab on:click={() => goto(`/title/${$page.params.imdbID}`)} color="primary" extended>
-					Back to Show Details
-				</Fab>
-			</div>
-			<div class="container">
-				<Paper color="secondary">
-					<LayoutGrid>
-						<Cell spanDevices={{ desktop: 6, tablet: 4, phone: 4 }}>
-							<h3 style="margin: 0;">{$selectedTitleDetails.Title}</h3>
-							<h4 style="margin: 10px auto;">Season {selectedSeason}</h4>
-						</Cell>
-						<Cell spanDevices={{ desktop: 6, tablet: 4, phone: 4 }}>
-							<div style="margin: 0;">
-								<Select bind:value={selectedSeason} on:click={() => changeSeason(selectedSeason)}>
-									{#each totalSeasons as seasonNum}
-										<Option value={seasonNum}>Season {seasonNum}</Option>
-									{/each}
-								</Select>
-							</div>
-							<h5 style="margin: 15px auto;">{$selectedTitleDetails.totalSeasons} Total Seasons</h5>
-						</Cell>
-						<Cell span={3} />
-					</LayoutGrid>
-				</Paper>
-			</div>
+			<SeasonSelectorCard {selectedSeason} {totalSeasons} {changeSeason} />
 			{#await loadEpisodesPromise}
-				<div class="loading centred-horizontal">
-					<CircularProgress style="height: 100px; width: 100px" indeterminate />
-				</div>
+				test
+				<LoadingIcon />
 			{:then}
 				{#each episodes as ep}
-					<div class="container">
-						<Paper>
-							<LayoutGrid>
-								<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }}>
-									<img src={ep.Poster} alt="{ep.Season}.{ep.Episode} - {ep.Title} poster" />
-								</Cell>
-								<Cell spanDevices={{ desktop: 6, tablet: 8, phone: 8 }}>
-									<InnerGrid>
-										<Cell spanDevices={{ desktop: 9, tablet: 6, phone: 3 }}>
-											<a href={`/title/${ep.imdbID}`} data-sveltekit-preload-data="off">
-												<Title>{ep.Season}.{ep.Episode}<br />{ep.Title}</Title>
-											</a>
-											<div style="opacity: 70%;">
-												<span class="move">{ep.imdbRating}</span>
-												<FontAwesomeIcon class="icon" icon={faStar} />
-												({ep.imdbVotes})
-											</div>
-										</Cell>
-										<Cell spanDevices={{ desktop: 3, tablet: 2, phone: 1 }}>
-											{ep.Released}
-										</Cell>
-										<Cell span={12}>
-											{ep.Plot}
-										</Cell>
-									</InnerGrid>
-								</Cell>
-							</LayoutGrid>
-						</Paper>
-					</div>
+					<Episode {ep} />
 				{/each}
 			{/await}
 		{:catch error}
@@ -160,11 +101,6 @@
 </div>
 
 <style>
-	.move {
-		transform: translate(0px, 0px);
-		display: inline-block;
-	}
-
 	* :global(.icon) {
 		color: yellow;
 	}
