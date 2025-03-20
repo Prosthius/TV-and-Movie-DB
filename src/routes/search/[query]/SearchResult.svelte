@@ -14,7 +14,6 @@
 	}
 </script>
 
-{$selectedTitle} // Verify selected title is being set on title/[imdbID]
 <div class="container">
 	<Paper color="secondary">
 		<LayoutGrid>
